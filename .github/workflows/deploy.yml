@@ -6,9 +6,9 @@
 # Target  : CloudPanel site https://timetable.halasoft.cc
 #
 # Required GitHub repo secrets (Settings > Secrets and variables > Actions):
-#   STAGE_SSH_HOST  - server IP or hostname
-#   STAGE_SSH_USER  - CloudPanel site user (halasoft-timetable)
-#   STAGE_SSH_KEY   - private SSH key whose public key is in
+#   SSH_HOST        - server IP or hostname
+#   SSH_USER        - CloudPanel site user (halasoft-timetable)
+#   SSH_KEY         - private SSH key whose public key is in
 #                     /home/halasoft-timetable/.ssh/authorized_keys
 #
 # Server must already have:
@@ -99,6 +99,14 @@ jobs:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_KEY: ${{ secrets.SSH_KEY }}
         run: |
+          # Fail with a clear message if any secret is not visible to this run.
+          for name in SSH_HOST SSH_USER SSH_KEY; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Secret $name is empty. Add it under Settings > Secrets and variables > Actions > Repository secrets."
+              exit 1
+            fi
+          done
+
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
 

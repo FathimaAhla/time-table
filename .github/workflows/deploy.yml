@@ -95,9 +95,9 @@ jobs:
       # 7. Write the SSH key and an ssh config alias called "deploy".
       - name: Configure SSH
         env:
-          SSH_HOST: ${{ secrets.STAGE_SSH_HOST }}
-          SSH_USER: ${{ secrets.STAGE_SSH_USER }}
-          SSH_KEY: ${{ secrets.STAGE_SSH_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
         run: |
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh

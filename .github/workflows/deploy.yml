@@ -8,7 +8,6 @@
 # Required GitHub repository secrets
 # (Settings > Secrets and variables > Actions > Repository secrets):
 #   SSH_HOST  - server IP or hostname only (no https://, no user@)
-#   SSH_PORT  - SSH port of the server (optional, defaults to 22)
 #   SSH_USER  - CloudPanel site user (halasoft-timetable)
 #   SSH_KEY   - private SSH key whose public key is in
 #               /home/halasoft-timetable/.ssh/authorized_keys
@@ -109,11 +108,10 @@ jobs:
           }
 
       # 8. Write the SSH key and an ssh config alias called "deploy".
-      #    SSH_PORT falls back to 22 when the secret is not set.
+      #    Uses only 3 secrets: SSH_HOST, SSH_USER, SSH_KEY (port 22).
       - name: Configure SSH
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_PORT: ${{ secrets.SSH_PORT || '22' }}
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_KEY: ${{ secrets.SSH_KEY }}
         run: |
@@ -126,24 +124,28 @@ jobs:
           done
 
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
-          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy
+          printf '%s\n' "$SSH_KEY" | tr -d '\r' > ~/.ssh/id_deploy
           chmod 600 ~/.ssh/id_deploy
 
-          # Fetch the server's host key on the configured port.
-          if ! ssh-keyscan -T 15 -p "$SSH_PORT" -H "$SSH_HOST" >> ~/.ssh/known_hosts; then
-            echo "::error::Cannot reach the server on port $SSH_PORT. Set the SSH_PORT secret to your server's SSH port and make sure that port is open in CloudPanel > Security."
-            exit 1
-          fi
+          # Strip accidental "https://", "user@", paths and spaces from SSH_HOST.
+          HOST=$(printf '%s' "$SSH_HOST" | tr -d '[:space:]' | sed -E 's#^[a-z]+://##; s#^.*@##; s#[/:].*$##')
 
           printf '%s\n' \
             "Host deploy" \
-            "  HostName $SSH_HOST" \
+            "  HostName $HOST" \
             "  User $SSH_USER" \
-            "  Port $SSH_PORT" \
+            "  Port 22" \
             "  IdentityFile ~/.ssh/id_deploy" \
             "  IdentitiesOnly yes" \
-            "  StrictHostKeyChecking yes" > ~/.ssh/config
+            "  StrictHostKeyChecking accept-new" \
+            "  ConnectTimeout 20" > ~/.ssh/config
           chmod 600 ~/.ssh/config
+
+          # Test the connection and show the real reason if it fails.
+          if ! ssh deploy "echo SSH connection OK"; then
+            echo "::error::SSH to the server failed. If the log says 'timed out', SSH_HOST must be the server IP (not the Cloudflare domain) and port 22 must be open to 0.0.0.0/0 in CloudPanel > Security. If it says 'Permission denied', the public key is not in /home/$SSH_USER/.ssh/authorized_keys."
+            exit 1
+          fi
 
       # 9. Stop early if the production .env is missing on the server.
       - name: Check server .env

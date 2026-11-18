@@ -113,7 +113,12 @@ jobs:
           printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy
           chmod 600 ~/.ssh/id_deploy
 
-          ssh-keyscan -H -p 22 "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          # Fetch the server's host key. Fails if the host is wrong or
+          # port 22 is blocked for GitHub runners (CloudPanel firewall).
+          if ! ssh-keyscan -T 15 -H -p 22 "$SSH_HOST" >> ~/.ssh/known_hosts; then
+            echo "::error::Cannot reach $SSH_HOST on port 22. Check SSH_HOST is only the IP/hostname and that port 22 is open to all IPs in CloudPanel > Security."
+            exit 1
+          fi
 
           cat > ~/.ssh/config <<EOF
           Host deploy

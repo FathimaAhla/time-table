@@ -1,0 +1,196 @@
+# =====================================================================
+# Deploy Timetable Application (Laravel 13 + Inertia React)
+# ---------------------------------------------------------------------
+# Trigger : every push to the "deploy" branch, or manually from the
+#           GitHub "Actions" tab (workflow_dispatch).
+# Target  : CloudPanel site https://timetable.halasoft.cc
+#
+# Required GitHub repo secrets (Settings > Secrets and variables > Actions):
+#   STAGE_SSH_HOST  - server IP or hostname
+#   STAGE_SSH_USER  - CloudPanel site user (halasoft-timetable)
+#   STAGE_SSH_KEY   - private SSH key whose public key is in
+#                     /home/halasoft-timetable/.ssh/authorized_keys
+#
+# Server must already have:
+#   - $SITE_DIR/.env with production values (APP_KEY, DB_*, APP_URL ...)
+#   - CloudPanel vhost root pointing to $SITE_DIR/public
+#   - PHP 8.4 and rsync installed
+# =====================================================================
+
+name: Deploy Timetable Application
+
+on:
+  push:
+    branches: [deploy]
+  workflow_dispatch:
+
+# Never run two deployments at the same time; queue the newer one.
+concurrency:
+  group: timetable-deploy
+  cancel-in-progress: false
+
+env:
+  APP_URL: https://timetable.halasoft.cc
+  SITE_DIR: /home/halasoft-timetable/htdocs/timetable.halasoft.cc
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      # 1. Get the source code of the pushed commit.
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. PHP is needed for Composer and for the Wayfinder Vite plugin,
+      #    which runs "php artisan wayfinder:generate" during the build.
+      - name: Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, intl, pdo_mysql, pdo_sqlite, bcmath, gd, zip
+          tools: composer:v2
+          coverage: none
+
+      # 3. Production PHP packages only (no dev tools like PHPUnit/Pint).
+      - name: Install Composer dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+      # 4. Temporary .env so artisan can boot on the runner while Vite /
+      #    Wayfinder generate the route helpers. It is NOT uploaded
+      #    (rsync excludes /.env) and is deleted after the build.
+      - name: Prepare build environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate --force
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      # 5. Build React/Tailwind assets into public/build.
+      - name: Build frontend assets
+        run: |
+          npm ci
+          npm run build
+
+      # 6. Strip everything the server does not need and make sure the
+      #    Vite manifest exists (otherwise every page would 500).
+      - name: Remove development files
+        run: |
+          rm -f .env
+          rm -rf node_modules tests docs .github .git
+          rm -rf storage/logs/*
+          rm -rf storage/framework/cache/*
+          rm -rf storage/framework/sessions/*
+          rm -rf storage/framework/views/*
+          test -f public/build/manifest.json || {
+            echo "Vite manifest missing"
+            exit 1
+          }
+
+      # 7. Write the SSH key and an ssh config alias called "deploy".
+      - name: Configure SSH
+        env:
+          SSH_HOST: ${{ secrets.STAGE_SSH_HOST }}
+          SSH_USER: ${{ secrets.STAGE_SSH_USER }}
+          SSH_KEY: ${{ secrets.STAGE_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+
+          ssh-keyscan -H -p 22 "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+          cat > ~/.ssh/config <<EOF
+          Host deploy
+            HostName $SSH_HOST
+            User $SSH_USER
+            Port 22
+            IdentityFile ~/.ssh/id_deploy
+            IdentitiesOnly yes
+            StrictHostKeyChecking yes
+          EOF
+
+          chmod 600 ~/.ssh/config
+
+      # 8. Stop early if the production .env is missing on the server.
+      - name: Check server configuration
+        run: |
+          ssh deploy "test -f '$SITE_DIR/.env'" || {
+            echo "Laravel .env file is missing on the server"
+            exit 1
+          }
+
+      # 9. Sync files. --delete removes server files not in the build,
+      #    EXCEPT the excluded paths below (server-owned data).
+      - name: Upload application files
+        run: |
+          rsync -az --delete \
+            --exclude='/.env' \
+            --exclude='/.user.ini' \
+            --exclude='/storage' \
+            --exclude='/public/storage' \
+            --exclude='/public/.well-known' \
+            --exclude='/database/database.sqlite' \
+            --exclude='/.git' \
+            --exclude='/.github' \
+            --exclude='/tests' \
+            --exclude='/node_modules' \
+            --exclude='/docs' \
+            ./ "deploy:$SITE_DIR/"
+
+      # 10. Run Laravel maintenance commands on the server.
+      - name: Run Laravel commands
+        run: |
+          ssh deploy "SITE_DIR='$SITE_DIR' bash -s" <<'REMOTE'
+          set -e
+
+          cd "$SITE_DIR"
+
+          PHP=$(command -v php8.4 || command -v php)
+
+          mkdir -p storage/app/public
+          mkdir -p storage/framework/cache/data
+          mkdir -p storage/framework/sessions
+          mkdir -p storage/framework/views
+          mkdir -p storage/logs
+          mkdir -p bootstrap/cache
+
+          "$PHP" artisan storage:link --force
+          "$PHP" artisan migrate --force
+          "$PHP" artisan optimize:clear
+          "$PHP" artisan config:cache
+          "$PHP" artisan route:cache
+          "$PHP" artisan view:cache
+
+          REMOTE
+
+      # 11. Confirm the site responds (200 OK or 302 redirect to login).
+      - name: Health check
+        run: |
+          for i in 1 2 3 4 5; do
+            STATUS=$(curl -s -o /dev/null -w '%{http_code}' \
+              --max-time 20 "$APP_URL" || true)
+
+            echo "Attempt $i: HTTP $STATUS"
+
+            if [ "$STATUS" = "200" ] || [ "$STATUS" = "302" ]; then
+              exit 0
+            fi
+
+            sleep 5
+          done
+
+          echo "Health check failed"
+          exit 1
+
+      # 12. Always remove the private key from the runner.
+      - name: Clean up SSH key
+        if: always()
+        run: rm -f ~/.ssh/id_deploy

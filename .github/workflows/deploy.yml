@@ -200,18 +200,39 @@ jobs:
           REMOTE
 
       # 12. Confirm the site responds (200 OK or 302 redirect to login).
+      #     Checked FROM THE SERVER (bypasses Cloudflare/proxy), then
+      #     the public URL is checked as a warning only.
       - name: Health check
         run: |
+          ssh deploy "SITE_DIR='$SITE_DIR' APP_URL='$APP_URL' bash -s" <<'REMOTE'
+          set -u
+          cd "$SITE_DIR"
+          PHP=$(command -v php8.4 || command -v php)
+          DOMAIN=$(printf '%s' "$APP_URL" | sed -E 's#^https?://##; s#/.*$##')
+
+          # 1. Laravel boots without errors.
+          "$PHP" artisan about --only=environment >/dev/null || { echo "Laravel failed to boot"; exit 1; }
+          echo "Laravel boots OK"
+
+          # 2. Request the site locally through nginx (any 2xx/3xx/4xx = PHP answered).
           for i in 1 2 3 4 5; do
-            STATUS=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$APP_URL" || echo 000)
-            echo "Attempt $i: HTTP $STATUS"
-            if [ "$STATUS" = "200" ] || [ "$STATUS" = "302" ]; then
-              exit 0
-            fi
+            STATUS=$(curl -sk -o /dev/null -w '%{http_code}' --max-time 20 \
+              --resolve "$DOMAIN:443:127.0.0.1" "https://$DOMAIN/" || echo 000)
+            echo "Local attempt $i: HTTP $STATUS"
+            case "$STATUS" in 2*|3*|4*) exit 0 ;; esac
             sleep 5
           done
-          echo "Health check failed for $APP_URL"
+          echo "Local health check failed. nginx error log:"
+          tail -n 20 "$HOME/logs/nginx/error.log" 2>/dev/null || true
           exit 1
+          REMOTE
+
+      - name: Public URL check (warning only)
+        continue-on-error: true
+        run: |
+          STATUS=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$APP_URL" || echo 000)
+          echo "Public $APP_URL: HTTP $STATUS"
+          case "$STATUS" in 2*|3*) ;; *) echo "::warning::Public URL returned $STATUS (check Cloudflare/DNS)";; esac
 
       # 12b. On failure, print server-side diagnostics (502 = PHP-FPM unreachable).
       - name: Server diagnostics

@@ -19,7 +19,7 @@ class AdminUserSeeder extends Seeder
         $institute = Institute::orderBy('id')->first();
 
         User::updateOrCreate(
-            ['email' => env('ADMIN_EMAIL', 'admin@example.com')],
+            ['email' => env('ADMIN_EMAIL', 'admin@tuitionsuite.com')],
             [
                 'institute_id' => $institute?->id,
                 'role' => 'super_admin',

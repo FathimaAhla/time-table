@@ -5,12 +5,11 @@
 #           GitHub "Actions" tab (workflow_dispatch).
 # Target  : CloudPanel site https://timetable.halasoft.cc
 #
-# Required GitHub repository secrets
-# (Settings > Secrets and variables > Actions > Repository secrets):
-#   SSH_HOST  - server IP or hostname only (no https://, no user@)
-#   SSH_USER  - CloudPanel site user (halasoft-timetable)
-#   SSH_KEY   - private SSH key whose public key is in
-#               /home/halasoft-timetable/.ssh/authorized_keys
+# Required GitHub repo secrets (Settings > Secrets and variables > Actions):
+#   SSH_HOST        - server IP or hostname
+#   SSH_USER        - CloudPanel site user (halasoft-timetable)
+#   SSH_KEY         - private SSH key whose public key is in
+#                     /home/halasoft-timetable/.ssh/authorized_keys
 #
 # Server must already have:
 #   - $SITE_DIR/.env with production values (APP_KEY, DB_*, APP_URL ...)
@@ -54,25 +53,13 @@ jobs:
           tools: composer:v2
           coverage: none
 
-      # 3. Cache Composer downloads between runs (faster deploys).
-      - name: Get Composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
-
-      - name: Cache Composer
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
-          restore-keys: composer-${{ runner.os }}-
-
-      # 4. Production PHP packages only (no PHPUnit/Pint etc.).
+      # 3. Production PHP packages only (no dev tools like PHPUnit/Pint).
       - name: Install Composer dependencies
         run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
-      # 5. Temporary .env so artisan can boot on the runner while Vite /
-      #    Wayfinder generate the route helpers. Deleted after the build
-      #    and never uploaded (rsync also excludes /.env).
+      # 4. Temporary .env so artisan can boot on the runner while Vite /
+      #    Wayfinder generate the route helpers. It is NOT uploaded
+      #    (rsync excludes /.env) and is deleted after the build.
       - name: Prepare build environment
         run: |
           cp .env.example .env
@@ -84,38 +71,35 @@ jobs:
           node-version: '22'
           cache: npm
 
-      # 6. Build React/Tailwind assets into public/build.
+      # 5. Build React/Tailwind assets into public/build.
       - name: Build frontend assets
         run: |
           npm ci
           npm run build
 
-      # 7. Strip everything the server does not need and make sure the
+      # 6. Strip everything the server does not need and make sure the
       #    Vite manifest exists (otherwise every page would 500).
       - name: Remove development files
         run: |
           rm -f .env
-          rm -rf node_modules tests docs .github .git \
-            .agents .claude .codex .cursor .junie .vscode .idea .fleet .zed \
-            AGENTS.md CLAUDE.md README.md boost.json .mcp.json build_srs.js \
-            phpunit.xml phpstan.neon pint.json .phpunit.result.cache \
-            .editorconfig .env.example .gitattributes .gitignore \
-            storage/logs/* storage/framework/cache/* \
-            storage/framework/sessions/* storage/framework/views/*
+          rm -rf node_modules tests docs .github .git
+          rm -rf storage/logs/*
+          rm -rf storage/framework/cache/*
+          rm -rf storage/framework/sessions/*
+          rm -rf storage/framework/views/*
           test -f public/build/manifest.json || {
             echo "Vite manifest missing"
             exit 1
           }
 
-      # 8. Write the SSH key and an ssh config alias called "deploy".
-      #    Uses only 3 secrets: SSH_HOST, SSH_USER, SSH_KEY (port 22).
+      # 7. Write the SSH key and an ssh config alias called "deploy".
       - name: Configure SSH
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_KEY: ${{ secrets.SSH_KEY }}
         run: |
-          # Fail with a clear message if a required secret is missing.
+          # Fail with a clear message if any secret is not visible to this run.
           for name in SSH_HOST SSH_USER SSH_KEY; do
             if [ -z "${!name}" ]; then
               echo "::error::Secret $name is empty. Add it under Settings > Secrets and variables > Actions > Repository secrets."
@@ -123,40 +107,36 @@ jobs:
             fi
           done
 
-          mkdir -p ~/.ssh && chmod 700 ~/.ssh
-          printf '%s\n' "$SSH_KEY" | tr -d '\r' > ~/.ssh/id_deploy
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy
           chmod 600 ~/.ssh/id_deploy
 
-          # Strip accidental "https://", "user@", paths and spaces from SSH_HOST.
-          HOST=$(printf '%s' "$SSH_HOST" | tr -d '[:space:]' | sed -E 's#^[a-z]+://##; s#^.*@##; s#[/:].*$##')
+          ssh-keyscan -H -p 22 "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
-          printf '%s\n' \
-            "Host deploy" \
-            "  HostName $HOST" \
-            "  User $SSH_USER" \
-            "  Port 22" \
-            "  IdentityFile ~/.ssh/id_deploy" \
-            "  IdentitiesOnly yes" \
-            "  StrictHostKeyChecking accept-new" \
-            "  ConnectTimeout 20" > ~/.ssh/config
+          cat > ~/.ssh/config <<EOF
+          Host deploy
+            HostName $SSH_HOST
+            User $SSH_USER
+            Port 22
+            IdentityFile ~/.ssh/id_deploy
+            IdentitiesOnly yes
+            StrictHostKeyChecking yes
+          EOF
+
           chmod 600 ~/.ssh/config
 
-          # Test the connection and show the real reason if it fails.
-          if ! ssh deploy "echo SSH connection OK"; then
-            echo "::error::SSH to the server failed. If the log says 'timed out', SSH_HOST must be the server IP (not the Cloudflare domain) and port 22 must be open to 0.0.0.0/0 in CloudPanel > Security. If it says 'Permission denied', the public key is not in /home/$SSH_USER/.ssh/authorized_keys."
-            exit 1
-          fi
-
-      # 9. Stop early if the production .env is missing on the server.
-      - name: Check server .env
+      # 8. Stop early if the production .env is missing on the server.
+      - name: Check server configuration
         run: |
           ssh deploy "test -f '$SITE_DIR/.env'" || {
-            echo "Missing $SITE_DIR/.env on the server"
+            echo "Laravel .env file is missing on the server"
             exit 1
           }
 
-      # 10. Sync files. --delete removes server files not in the build,
-      #     EXCEPT the excluded paths below (server-owned data).
+      # 9. Sync files. --delete removes server files not in the build,
+      #    EXCEPT the excluded paths below (server-owned data).
       - name: Upload application files
         run: |
           rsync -az --delete \
@@ -166,28 +146,29 @@ jobs:
             --exclude='/public/storage' \
             --exclude='/public/.well-known' \
             --exclude='/database/database.sqlite' \
-            --exclude='.git' \
-            --exclude='.github' \
+            --exclude='/.git' \
+            --exclude='/.github' \
             --exclude='/tests' \
-            --exclude='node_modules' \
+            --exclude='/node_modules' \
             --exclude='/docs' \
             ./ "deploy:$SITE_DIR/"
 
-      # 11. Run Laravel commands on the server inside maintenance mode.
-      #     The trap always brings the site back up, even on error.
+      # 10. Run Laravel maintenance commands on the server.
       - name: Run Laravel commands
         run: |
           ssh deploy "SITE_DIR='$SITE_DIR' bash -s" <<'REMOTE'
-          set -euo pipefail
+          set -e
+
           cd "$SITE_DIR"
+
           PHP=$(command -v php8.4 || command -v php)
 
-          mkdir -p storage/app/public \
-            storage/framework/{cache/data,sessions,views} \
-            storage/logs bootstrap/cache
-
-          "$PHP" artisan down --retry=15 || true
-          trap '"$PHP" artisan up' EXIT
+          mkdir -p storage/app/public
+          mkdir -p storage/framework/cache/data
+          mkdir -p storage/framework/sessions
+          mkdir -p storage/framework/views
+          mkdir -p storage/logs
+          mkdir -p bootstrap/cache
 
           "$PHP" artisan storage:link --force
           "$PHP" artisan migrate --force
@@ -195,72 +176,29 @@ jobs:
           "$PHP" artisan config:cache
           "$PHP" artisan route:cache
           "$PHP" artisan view:cache
-          "$PHP" artisan event:cache
-          "$PHP" artisan queue:restart || true
+
           REMOTE
 
-      # 12. Confirm the site responds (200 OK or 302 redirect to login).
-      #     Checked FROM THE SERVER (bypasses Cloudflare/proxy), then
-      #     the public URL is checked as a warning only.
+      # 11. Confirm the site responds (200 OK or 302 redirect to login).
       - name: Health check
         run: |
-          ssh deploy "SITE_DIR='$SITE_DIR' APP_URL='$APP_URL' bash -s" <<'REMOTE'
-          set -u
-          cd "$SITE_DIR"
-          PHP=$(command -v php8.4 || command -v php)
-          DOMAIN=$(printf '%s' "$APP_URL" | sed -E 's#^https?://##; s#/.*$##')
-
-          # 1. Laravel boots without errors.
-          "$PHP" artisan about --only=environment >/dev/null || { echo "Laravel failed to boot"; exit 1; }
-          echo "Laravel boots OK"
-
-          # 2. Request the site locally through nginx (any 2xx/3xx/4xx = PHP answered).
           for i in 1 2 3 4 5; do
-            STATUS=$(curl -sk -o /dev/null -w '%{http_code}' --max-time 20 \
-              --resolve "$DOMAIN:443:127.0.0.1" "https://$DOMAIN/" || echo 000)
-            echo "Local attempt $i: HTTP $STATUS"
-            case "$STATUS" in 2*|3*|4*) exit 0 ;; esac
+            STATUS=$(curl -s -o /dev/null -w '%{http_code}' \
+              --max-time 20 "$APP_URL" || true)
+
+            echo "Attempt $i: HTTP $STATUS"
+
+            if [ "$STATUS" = "200" ] || [ "$STATUS" = "302" ]; then
+              exit 0
+            fi
+
             sleep 5
           done
-          echo "Local health check failed. nginx error log:"
-          tail -n 20 "$HOME/logs/nginx/error.log" 2>/dev/null || true
+
+          echo "Health check failed"
           exit 1
-          REMOTE
 
-      - name: Public URL check (warning only)
-        continue-on-error: true
-        run: |
-          STATUS=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$APP_URL" || echo 000)
-          echo "Public $APP_URL: HTTP $STATUS"
-          case "$STATUS" in 2*|3*) ;; *) echo "::warning::Public URL returned $STATUS (check Cloudflare/DNS)";; esac
-
-      # 12b. On failure, print server-side diagnostics (502 = PHP-FPM unreachable).
-      - name: Server diagnostics
-        if: failure()
-        run: |
-          [ -f ~/.ssh/config ] || exit 0
-          ssh deploy "SITE_DIR='$SITE_DIR' bash -s" <<'REMOTE' || true
-          echo "== CLI PHP =="; (command -v php8.4 && php8.4 -v) || php -v
-          echo "== PHP-FPM processes =="; ps aux | grep -E 'php-fpm' | grep -v grep || echo "NO php-fpm running"
-          echo "== FPM sockets =="; ls -la /run/php/ /var/run/php/ 2>/dev/null || true
-          echo "== Local request =="; curl -s -o /dev/null -w 'HTTP %{http_code}\n' -H 'Host: timetable.halasoft.cc' http://127.0.0.1/ || true
-          echo "== Laravel log (tail) =="; tail -n 40 "$SITE_DIR/storage/logs/laravel.log" 2>/dev/null || echo "no laravel.log"
-          echo "== nginx error log (tail) =="; tail -n 30 /home/*/logs/nginx/error.log 2>/dev/null || echo "cannot read nginx log"
-          REMOTE
-
-      # 13. If anything failed, make sure the site is not left in
-      #     maintenance mode.
-      - name: Bring site up (safety net)
-        if: failure()
-        run: |
-          [ -f ~/.ssh/config ] || { echo "SSH not configured, skipping"; exit 0; }
-          ssh deploy "SITE_DIR='$SITE_DIR' bash -s" <<'REMOTE' || true
-          cd "$SITE_DIR" || exit 0
-          PHP=$(command -v php8.4 || command -v php)
-          [ -f artisan ] && "$PHP" artisan up || true
-          REMOTE
-
-      # 14. Always remove the private key from the runner.
+      # 12. Always remove the private key from the runner.
       - name: Clean up SSH key
         if: always()
         run: rm -f ~/.ssh/id_deploy

@@ -213,6 +213,20 @@ jobs:
           echo "Health check failed for $APP_URL"
           exit 1
 
+      # 12b. On failure, print server-side diagnostics (502 = PHP-FPM unreachable).
+      - name: Server diagnostics
+        if: failure()
+        run: |
+          [ -f ~/.ssh/config ] || exit 0
+          ssh deploy "SITE_DIR='$SITE_DIR' bash -s" <<'REMOTE' || true
+          echo "== CLI PHP =="; (command -v php8.4 && php8.4 -v) || php -v
+          echo "== PHP-FPM processes =="; ps aux | grep -E 'php-fpm' | grep -v grep || echo "NO php-fpm running"
+          echo "== FPM sockets =="; ls -la /run/php/ /var/run/php/ 2>/dev/null || true
+          echo "== Local request =="; curl -s -o /dev/null -w 'HTTP %{http_code}\n' -H 'Host: timetable.halasoft.cc' http://127.0.0.1/ || true
+          echo "== Laravel log (tail) =="; tail -n 40 "$SITE_DIR/storage/logs/laravel.log" 2>/dev/null || echo "no laravel.log"
+          echo "== nginx error log (tail) =="; tail -n 30 /home/*/logs/nginx/error.log 2>/dev/null || echo "cannot read nginx log"
+          REMOTE
+
       # 13. If anything failed, make sure the site is not left in
       #     maintenance mode.
       - name: Bring site up (safety net)

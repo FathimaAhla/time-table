@@ -42,12 +42,13 @@ export function TeacherTimetableGrid({
                 </div>
             </div>
 
+            <div className="overflow-x-auto">
             <table className="w-full border-collapse text-sm">
                 <thead>
                     <tr>
-                        <th className="w-28 border bg-muted/50 p-2 text-left">Time</th>
+                        <th className="sticky left-0 z-10 w-20 border bg-muted p-2 text-left sm:w-28">Time</th>
                         {weekDays.map((d) => (
-                            <th key={d.id} className="border bg-muted/50 p-2 text-left">
+                            <th key={d.id} className="min-w-24 border bg-muted/50 p-2 text-left sm:min-w-0">
                                 {d.name}
                             </th>
                         ))}
@@ -56,13 +57,14 @@ export function TeacherTimetableGrid({
                 <tbody>
                     {timeSlots.map((slot) => (
                         <tr key={slot.id}>
-                            <td className="border p-2 align-top font-mono text-xs">
-                                {slot.start_time.slice(0, 5)} – {slot.end_time.slice(0, 5)}
+                            <td className="sticky left-0 z-10 border bg-background p-1.5 align-top font-mono text-[11px] sm:p-2 sm:text-xs">
+                                <div className="whitespace-nowrap">{slot.start_time.slice(0, 5)}</div>
+                                <div className="whitespace-nowrap text-muted-foreground">{slot.end_time.slice(0, 5)}</div>
                             </td>
                             {slot.slot_type === 'fixed' ? (
                                 <td
                                     colSpan={weekDays.length}
-                                    className="border bg-orange-50 p-2 text-center text-xs font-medium text-orange-800 dark:bg-orange-900/20 dark:text-orange-300"
+                                    className="border bg-orange-50 p-2 text-left text-xs font-medium text-orange-800 sm:text-center dark:bg-orange-900/20 dark:text-orange-300"
                                 >
                                     {slot.fixed_activity_name}
                                 </td>
@@ -94,6 +96,7 @@ export function TeacherTimetableGrid({
                     ))}
                 </tbody>
             </table>
+            </div>
         </div>
     );
 }

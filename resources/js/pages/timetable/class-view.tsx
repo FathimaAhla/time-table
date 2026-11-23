@@ -42,6 +42,22 @@ export default function ClassView({
         router.post(TimetableController.sync.url(schoolClass.id));
     }
 
+    /**
+     * Touch-friendly alternative to drag and drop: tap a period to select it,
+     * then tap another period (swap) or an empty cell (move). Tap it again to cancel.
+     */
+    function onCellTap(dayId: number, slotId: number, session?: TimetableSession) {
+        if (!canManage) return;
+
+        if (dragSessionId === null) {
+            if (session && !session.is_locked) setDragSessionId(session.id);
+
+            return;
+        }
+
+        onDrop(dayId, slotId, session);
+    }
+
     function onDrop(dayId: number, slotId: number, targetSession?: TimetableSession) {
         if (dragSessionId === null) return;
         const dragged = sessions.find((s) => s.id === dragSessionId);
@@ -80,7 +96,7 @@ export default function ClassView({
                     </h1>
                     <p className="text-sm text-muted-foreground">{term ? term.name : 'No current term'}</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                     {canManage && timetable?.is_out_of_sync && (
                         <Button variant="secondary" onClick={sync}>
                             Sync new changes
@@ -124,9 +140,9 @@ export default function ClassView({
                 <table className="w-full border-collapse text-sm">
                     <thead>
                         <tr>
-                            <th className="w-32 border bg-muted/50 p-2 text-left">Time</th>
+                            <th className="sticky left-0 z-10 w-20 border bg-muted p-2 text-left sm:w-32">Time</th>
                             {weekDays.map((d) => (
-                                <th key={d.id} className="border bg-muted/50 p-2 text-left">
+                                <th key={d.id} className="min-w-28 border bg-muted/50 p-2 text-left sm:min-w-0">
                                     {d.name}
                                 </th>
                             ))}
@@ -135,12 +151,13 @@ export default function ClassView({
                     <tbody>
                         {timeSlots.map((slot) => (
                             <tr key={slot.id}>
-                                <td className="border p-2 align-top font-mono text-xs">
-                                    <div>{slot.start_time.slice(0, 5)} – {slot.end_time.slice(0, 5)}</div>
-                                    {slot.slot_type === 'period' && <div className="text-muted-foreground">{slot.name}</div>}
+                                <td className="sticky left-0 z-10 border bg-background p-1.5 align-top font-mono text-[11px] sm:p-2 sm:text-xs">
+                                    <div className="whitespace-nowrap">{slot.start_time.slice(0, 5)}</div>
+                                    <div className="whitespace-nowrap text-muted-foreground">{slot.end_time.slice(0, 5)}</div>
+                                    {slot.slot_type === 'period' && <div className="mt-0.5 text-muted-foreground">{slot.name}</div>}
                                 </td>
                                 {slot.slot_type === 'fixed' ? (
-                                    <td colSpan={weekDays.length} className="border bg-orange-50 p-2 text-center font-medium text-orange-800 dark:bg-orange-900/20 dark:text-orange-300">
+                                    <td colSpan={weekDays.length} className="border bg-orange-50 p-2 text-left font-medium text-orange-800 sm:text-center dark:bg-orange-900/20 dark:text-orange-300">
                                         {slot.fixed_activity_name}
                                     </td>
                                 ) : (
@@ -152,30 +169,37 @@ export default function ClassView({
                                                 className="border p-1 align-top"
                                                 onDragOver={(e) => e.preventDefault()}
                                                 onDrop={() => onDrop(day.id, slot.id, session)}
+                                                onClick={() => onCellTap(day.id, slot.id, session)}
                                             >
                                                 {session ? (
                                                     <div
                                                         draggable={canManage && !session.is_locked}
                                                         onDragStart={() => setDragSessionId(session.id)}
+                                                        onDragEnd={() => setDragSessionId(null)}
                                                         className={
                                                             'group relative flex min-h-14 flex-col justify-center rounded-md p-2 text-xs ' +
                                                             (session.is_locked
                                                                 ? 'cursor-not-allowed border border-dashed bg-neutral-100 dark:bg-neutral-800'
-                                                                : 'cursor-grab border bg-sky-50 hover:shadow dark:bg-sky-900/30')
+                                                                : 'cursor-pointer border bg-sky-50 hover:shadow sm:cursor-grab dark:bg-sky-900/30') +
+                                                            (dragSessionId === session.id ? ' ring-2 ring-primary' : '')
                                                         }
                                                     >
                                                         <span className="font-medium">{session.subject?.name}</span>
                                                         <span className="text-muted-foreground">{session.teacher?.full_name}</span>
                                                         {canManage && (<button
-                                                            onClick={() => toggleLock(session)}
-                                                            className="absolute right-1 top-1 opacity-0 transition group-hover:opacity-100"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                toggleLock(session);
+                                                            }}
+                                                            className="absolute right-0.5 top-0.5 rounded p-1.5 opacity-70 transition sm:p-1 sm:opacity-0 sm:group-hover:opacity-100"
                                                             title={session.is_locked ? 'Unlock' : 'Lock cell'}
+                                                            aria-label={session.is_locked ? 'Unlock cell' : 'Lock cell'}
                                                         >
-                                                            {session.is_locked ? <Lock className="size-3" /> : <Unlock className="size-3" />}
+                                                            {session.is_locked ? <Lock className="size-3.5" /> : <Unlock className="size-3.5" />}
                                                         </button>)}
                                                     </div>
                                                 ) : (
-                                                    <div className="min-h-14 rounded-md border border-dashed" />
+                                                    <div className={'min-h-14 rounded-md border border-dashed' + (dragSessionId !== null ? ' bg-primary/5' : '')} />
                                                 )}
                                             </td>
                                         );
@@ -188,8 +212,8 @@ export default function ClassView({
             </div>
 
             <p className="text-xs text-muted-foreground">
-                Drag a period onto another to swap it, or onto an empty cell to move it. Locked periods (padlock icon) are skipped by sync and
-                re-generation.
+                Drag a period onto another to swap it, or onto an empty cell to move it. On a phone, tap a period, then tap where it should go.
+                Locked periods (padlock icon) are skipped by sync and re-generation.
             </p>
         </div>
     );

@@ -93,10 +93,11 @@ export function DataTable({ head, children }: { head: ReactNode; children: React
     return (
         <div className="relative w-full overflow-x-auto rounded-xl border bg-card">
             <table className="w-full caption-bottom text-sm">
-                <thead className="border-b bg-muted/40 [&_th]:h-10 [&_th]:px-3 [&_th]:text-left [&_th]:font-medium [&_th]:whitespace-nowrap [&_th]:text-muted-foreground">
+                {/* The last column (row actions) stays pinned to the right edge so it is always reachable on phones. */}
+                <thead className="border-b bg-muted/40 [&_th]:h-10 [&_th]:px-3 [&_th]:text-left [&_th]:font-medium [&_th]:whitespace-nowrap [&_th]:text-muted-foreground [&_th:last-child]:sticky [&_th:last-child]:right-0 [&_th:last-child]:bg-muted">
                     {head}
                 </thead>
-                <tbody className="[&_td]:p-3 [&_td]:align-middle [&_tr]:border-b [&_tr]:transition-colors [&_tr:hover]:bg-muted/40 [&_tr:last-child]:border-0">
+                <tbody className="[&_td]:p-3 [&_td]:align-middle [&_td:last-child]:sticky [&_td:last-child]:right-0 [&_td:last-child]:bg-card [&_td:last-child]:shadow-[-8px_0_8px_-8px_rgba(0,0,0,0.25)] [&_tr]:border-b [&_tr]:transition-colors [&_tr:hover]:bg-muted/40 [&_tr:last-child]:border-0">
                     {children}
                 </tbody>
             </table>

@@ -44,6 +44,20 @@ export default function Register({ passwordRules }: Props) {
                             </div>
 
                             <div className="grid gap-2">
+                                <Label htmlFor="school_name">
+                                    School / institute name
+                                </Label>
+                                <Input
+                                    id="school_name"
+                                    type="text"
+                                    tabIndex={3}
+                                    name="school_name"
+                                    placeholder="Your school name"
+                                />
+                                <InputError message={errors.school_name} />
+                            </div>
+
+                            <div className="grid gap-2">
                                 <Label htmlFor="email">Email address</Label>
                                 <Input
                                     id="email"

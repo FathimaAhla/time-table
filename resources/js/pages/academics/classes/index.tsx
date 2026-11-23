@@ -222,7 +222,7 @@ export default function ClassesIndex({
                 onSubmit={submit}
                 className="sm:max-w-lg"
             >
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField label="Grade" error={form.errors.grade_id}>
                         <Select value={form.data.grade_id} onValueChange={(value) => form.setData('grade_id', value)}>
                             <SelectTrigger>
@@ -252,7 +252,7 @@ export default function ClassesIndex({
                     </FormField>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField label="Classroom" error={form.errors.classroom_id}>
                         <Select value={form.data.classroom_id} onValueChange={(value) => form.setData('classroom_id', value)}>
                             <SelectTrigger>

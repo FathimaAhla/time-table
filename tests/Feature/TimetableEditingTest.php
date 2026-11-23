@@ -8,7 +8,11 @@ use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\TeacherAssignment;
 use App\Models\Term;
+use App\Models\TimeSlot;
+use App\Models\Timetable;
+use App\Models\TimetableSession;
 use App\Models\User;
+use App\Models\WeekDay;
 use Inertia\Testing\AssertableInertia as Assert;
 
 beforeEach(function () {
@@ -97,4 +101,27 @@ test('anyone can open the timetable playground', function () {
     $this->get(route('playground'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page->component('playground'));
+});
+
+test('two periods in the same class timetable can be swapped', function () {
+    $year = AcademicYear::create(['name' => '2026', 'start_date' => '2026-01-01', 'end_date' => '2026-12-31', 'is_current' => true]);
+    $term = Term::create(['academic_year_id' => $year->id, 'name' => 'Term 1', 'start_date' => '2026-01-01', 'end_date' => '2026-04-30', 'is_current' => true]);
+    $schoolClass = SchoolClass::create(['grade_id' => $this->grade->id, 'name' => 'A']);
+    $maths = Subject::create(['name' => 'Mathematics', 'code' => 'MATH', 'type' => 'core']);
+    $science = Subject::create(['name' => 'Science', 'code' => 'SCI', 'type' => 'core']);
+    $day = WeekDay::create(['name' => 'Monday', 'short_code' => 'MON', 'sort_order' => 1, 'is_school_day' => true]);
+    $slot1 = TimeSlot::create(['name' => 'P1', 'start_time' => '08:00', 'end_time' => '08:40', 'sort_order' => 1, 'slot_type' => 'period']);
+    $slot2 = TimeSlot::create(['name' => 'P2', 'start_time' => '08:40', 'end_time' => '09:20', 'sort_order' => 2, 'slot_type' => 'period']);
+    $timetable = Timetable::create(['term_id' => $term->id, 'school_class_id' => $schoolClass->id, 'status' => 'draft']);
+
+    $a = TimetableSession::create(['timetable_id' => $timetable->id, 'week_day_id' => $day->id, 'time_slot_id' => $slot1->id, 'subject_id' => $maths->id]);
+    $b = TimetableSession::create(['timetable_id' => $timetable->id, 'week_day_id' => $day->id, 'time_slot_id' => $slot2->id, 'subject_id' => $science->id]);
+
+    $this->post(route('timetable.swap'), ['session_id_a' => $a->id, 'session_id_b' => $b->id])
+        ->assertSessionHasNoErrors()
+        ->assertSessionMissing('error');
+
+    // Maths is now in period 2 and Science in period 1.
+    expect(TimetableSession::where('time_slot_id', $slot1->id)->value('subject_id'))->toBe($science->id)
+        ->and(TimetableSession::where('time_slot_id', $slot2->id)->value('subject_id'))->toBe($maths->id);
 });

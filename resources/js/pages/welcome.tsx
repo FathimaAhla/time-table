@@ -14,7 +14,7 @@ import {
     Users,
     Wand2,
 } from 'lucide-react';
-import { dashboard, login, playground, register } from '@/routes';
+import { dashboard, login, register } from '@/routes';
 
 const features = [
     {
@@ -88,9 +88,6 @@ export default function Welcome() {
                             School Timetable
                         </span>
                         <nav className="flex items-center gap-2 text-sm">
-                            <Link href={playground()} className="hidden rounded-md px-3 py-1.5 hover:bg-muted sm:inline-block">
-                                Try it free
-                            </Link>
                             {auth.user ? (
                                 <Link href={dashboard()} className="rounded-md bg-indigo-600 px-4 py-1.5 font-medium text-white hover:bg-indigo-700">
                                     Dashboard
@@ -125,26 +122,18 @@ export default function Welcome() {
                                 it ready to print.
                             </p>
                             <div className="mt-8 flex flex-wrap gap-3">
-                                <Link
-                                    href={playground()}
-                                    className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-3 font-medium text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-700"
-                                >
-                                    <MousePointerClick className="size-4" />
-                                    Make a timetable now
-                                </Link>
                                 {auth.user ? (
-                                    <Link href={dashboard()} className="inline-flex items-center gap-2 rounded-lg border px-5 py-3 font-medium transition hover:bg-muted">
+                                    <Link href={dashboard()} className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-3 font-medium text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700">
                                         Go to dashboard
                                         <ArrowRight className="size-4" />
                                     </Link>
                                 ) : (
-                                    <Link href={register()} className="inline-flex items-center gap-2 rounded-lg border px-5 py-3 font-medium transition hover:bg-muted">
+                                    <Link href={register()} className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-3 font-medium text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-700">
                                         Get started
                                         <ArrowRight className="size-4" />
                                     </Link>
                                 )}
                             </div>
-                            <p className="mt-3 text-xs text-muted-foreground">No sign-up needed to try the drag-and-drop maker.</p>
                         </div>
 
                         <div className="relative">
@@ -260,16 +249,17 @@ export default function Welcome() {
 
                 <section className="px-4 pb-16">
                     <div className="mx-auto max-w-6xl overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 to-sky-500 p-10 text-center text-white shadow-xl">
-                        <h2 className="text-3xl font-bold">Got five minutes? Make your first timetable.</h2>
+                        <h2 className="text-2xl font-bold sm:text-3xl">Ready to make your first timetable?</h2>
                         <p className="mx-auto mt-3 max-w-xl text-indigo-50">
-                            Open the drag-and-drop maker, add your subjects, drop them on the grid and download a PDF. No account needed.
+                            Register your school, add your subjects and teachers, generate every class timetable and download a PDF.
                         </p>
                         <div className="mt-6 flex flex-wrap justify-center gap-3">
-                            <Link href={playground()} className="rounded-lg bg-white px-5 py-3 font-medium text-indigo-700 hover:bg-indigo-50">
-                                Open the timetable maker
-                            </Link>
-                            {!auth.user && (
-                                <Link href={register()} className="inline-flex items-center gap-2 rounded-lg border border-white/40 px-5 py-3 font-medium hover:bg-white/10">
+                            {auth.user ? (
+                                <Link href={dashboard()} className="rounded-lg bg-white px-5 py-3 font-medium text-indigo-700 hover:bg-indigo-50">
+                                    Go to dashboard
+                                </Link>
+                            ) : (
+                                <Link href={register()} className="inline-flex items-center gap-2 rounded-lg bg-white px-5 py-3 font-medium text-indigo-700 hover:bg-indigo-50">
                                     <Lock className="size-4" /> Create your account
                                 </Link>
                             )}

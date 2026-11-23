@@ -71,9 +71,9 @@ export default function MasterTimetable({
                     <h1 className="text-xl font-semibold">Master Timetable</h1>
                     <p className="text-sm text-muted-foreground">{term ? term.name : 'No current term configured'} — all classes</p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex w-full flex-wrap gap-2 sm:w-auto">
                     <Select value="" onValueChange={(value) => router.visit(value)}>
-                        <SelectTrigger className="w-56">
+                        <SelectTrigger className="w-full sm:w-56">
                             <SelectValue placeholder="Open a class or teacher..." />
                         </SelectTrigger>
                         <SelectContent>
@@ -106,9 +106,9 @@ export default function MasterTimetable({
                 </div>
             </div>
 
-            <div className="flex flex-wrap gap-3 rounded-lg border p-3">
+            <div className="grid grid-cols-2 gap-3 rounded-lg border p-3 sm:flex sm:flex-wrap">
                 <Select value={filters.grade_id ?? 'all'} onValueChange={(v) => setFilter('grade_id', v)}>
-                    <SelectTrigger className="w-40">
+                    <SelectTrigger className="w-full sm:w-40">
                         <SelectValue placeholder="All grades" />
                     </SelectTrigger>
                     <SelectContent>
@@ -122,7 +122,7 @@ export default function MasterTimetable({
                 </Select>
 
                 <Select value={filters.school_class_id ?? 'all'} onValueChange={(v) => setFilter('school_class_id', v)}>
-                    <SelectTrigger className="w-44">
+                    <SelectTrigger className="w-full sm:w-44">
                         <SelectValue placeholder="All classes" />
                     </SelectTrigger>
                     <SelectContent>
@@ -136,7 +136,7 @@ export default function MasterTimetable({
                 </Select>
 
                 <Select value={filters.teacher_id ?? 'all'} onValueChange={(v) => setFilter('teacher_id', v)}>
-                    <SelectTrigger className="w-48">
+                    <SelectTrigger className="w-full sm:w-48">
                         <SelectValue placeholder="All teachers" />
                     </SelectTrigger>
                     <SelectContent>
@@ -150,7 +150,7 @@ export default function MasterTimetable({
                 </Select>
 
                 <Select value={filters.subject_id ?? 'all'} onValueChange={(v) => setFilter('subject_id', v)}>
-                    <SelectTrigger className="w-40">
+                    <SelectTrigger className="w-full sm:w-40">
                         <SelectValue placeholder="All subjects" />
                     </SelectTrigger>
                     <SelectContent>
@@ -177,7 +177,7 @@ export default function MasterTimetable({
 
                     return (
                         <div key={c.id} className="rounded-lg border p-3">
-                            <div className="mb-2 flex items-center justify-between">
+                            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                                 <h2 className="font-semibold">
                                     {currentInstitute ? `${currentInstitute.name} — ` : ''}
                                     {c.grade?.name}{c.name}
@@ -197,9 +197,9 @@ export default function MasterTimetable({
                                 <table className="w-full border-collapse text-xs">
                                     <thead>
                                         <tr>
-                                            <th className="w-28 border bg-muted/50 p-1.5 text-left">Time</th>
+                                            <th className="sticky left-0 w-20 border bg-muted p-1.5 text-left sm:w-28">Time</th>
                                             {weekDays.map((d) => (
-                                                <th key={d.id} className="border bg-muted/50 p-1.5 text-left">
+                                                <th key={d.id} className="min-w-24 border bg-muted/50 p-1.5 text-left sm:min-w-0">
                                                     {d.short_code}
                                                 </th>
                                             ))}
@@ -208,11 +208,11 @@ export default function MasterTimetable({
                                     <tbody>
                                         {timeSlots.map((slot) => (
                                             <tr key={slot.id}>
-                                                <td className="border p-1.5 font-mono">{slot.start_time.slice(0, 5)}-{slot.end_time.slice(0, 5)}</td>
+                                                <td className="sticky left-0 border bg-background p-1.5 font-mono whitespace-nowrap">{slot.start_time.slice(0, 5)}<span className="hidden sm:inline">-</span><br className="sm:hidden" />{slot.end_time.slice(0, 5)}</td>
                                                 {slot.slot_type === 'fixed' ? (
                                                     <td
                                                         colSpan={weekDays.length}
-                                                        className="border bg-orange-50 p-1.5 text-center text-orange-800 dark:bg-orange-900/20 dark:text-orange-300"
+                                                        className="border bg-orange-50 p-1.5 text-left text-orange-800 sm:text-center dark:bg-orange-900/20 dark:text-orange-300"
                                                     >
                                                         {slot.fixed_activity_name}
                                                     </td>

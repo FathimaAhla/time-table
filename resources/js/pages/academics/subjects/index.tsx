@@ -138,7 +138,7 @@ export default function SubjectsIndex({ subjects }: { subjects: Subject[] }) {
                 <FormField label="Subject name" error={form.errors.name}>
                     <Input value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} placeholder="e.g. Mathematics" autoFocus required />
                 </FormField>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField label="Code" error={form.errors.code}>
                         <Input
                             value={form.data.code}
@@ -159,7 +159,7 @@ export default function SubjectsIndex({ subjects }: { subjects: Subject[] }) {
                         </Select>
                     </FormField>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField label="Colour" error={form.errors.color_hex}>
                         <Input
                             type="color"

@@ -376,10 +376,23 @@ class TimetableGenerator
         $aOld = $a->only(['week_day_id', 'time_slot_id']);
         $bOld = $b->only(['week_day_id', 'time_slot_id']);
 
-        DB::transaction(function () use ($a, $b, $aOld, $bOld) {
-            $a->update(['week_day_id' => $bOld['week_day_id'], 'time_slot_id' => $bOld['time_slot_id']]);
-            $b->update(['week_day_id' => $aOld['week_day_id'], 'time_slot_id' => $aOld['time_slot_id']]);
-        });
+        // Exchange what is taught rather than where: moving rows into each other's
+        // cell would violate the unique (timetable, day, slot) constraint mid-swap.
+        $content = ['teacher_assignment_id', 'subject_id', 'teacher_id', 'room'];
+        $aContent = $a->only($content);
+        $bContent = $b->only($content);
+
+        if ($a->timetable_id === $b->timetable_id) {
+            DB::transaction(function () use ($a, $b, $aContent, $bContent) {
+                $a->update($bContent);
+                $b->update($aContent);
+            });
+        } else {
+            DB::transaction(function () use ($a, $b, $aOld, $bOld) {
+                $a->update(['week_day_id' => $bOld['week_day_id'], 'time_slot_id' => $bOld['time_slot_id']]);
+                $b->update(['week_day_id' => $aOld['week_day_id'], 'time_slot_id' => $aOld['time_slot_id']]);
+            });
+        }
 
         TimetableChangeLog::create([
             'timetable_id' => $a->timetable_id,

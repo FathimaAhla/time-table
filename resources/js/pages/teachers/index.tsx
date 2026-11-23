@@ -178,7 +178,7 @@ export default function TeachersIndex({ teachers, subjects }: { teachers: Teache
                 onSubmit={submit}
                 className="sm:max-w-xl"
             >
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <FormField label="Employee no." error={form.errors.employee_no}>
                         <Input value={form.data.employee_no} onChange={(e) => form.setData('employee_no', e.target.value)} placeholder="T-1001" required />
                     </FormField>
@@ -188,7 +188,7 @@ export default function TeachersIndex({ teachers, subjects }: { teachers: Teache
                         </FormField>
                     </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormField label="Phone" error={form.errors.phone}>
                         <Input value={form.data.phone} onChange={(e) => form.setData('phone', e.target.value)} />
                     </FormField>

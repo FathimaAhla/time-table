@@ -7,6 +7,7 @@ use App\Models\Grade;
 use App\Models\SchoolClass;
 use App\Models\Teacher;
 use App\Services\TimetableGenerator;
+use App\Support\InstituteContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -32,11 +33,11 @@ class SchoolClassController extends Controller
     public function store(Request $request, TimetableGenerator $generator): RedirectResponse
     {
         $data = $request->validate([
-            'grade_id' => 'required|exists:grades,id',
+            'grade_id' => ['required', InstituteContext::exists('grades')],
             'name' => ['required', 'string', 'max:50', $this->uniqueNameInGrade($request)],
             'capacity' => 'nullable|integer|min:1',
-            'classroom_id' => ['nullable', 'exists:classrooms,id', $this->classroomNotTaken()],
-            'class_teacher_id' => 'nullable|exists:teachers,id',
+            'classroom_id' => ['nullable', InstituteContext::exists('classrooms'), $this->classroomNotTaken()],
+            'class_teacher_id' => ['nullable', InstituteContext::exists('teachers')],
             'class_teacher_first_period' => 'boolean',
         ], $this->messages());
 
@@ -61,11 +62,11 @@ class SchoolClassController extends Controller
     public function update(Request $request, SchoolClass $schoolClass, TimetableGenerator $generator): RedirectResponse
     {
         $data = $request->validate([
-            'grade_id' => 'required|exists:grades,id',
+            'grade_id' => ['required', InstituteContext::exists('grades')],
             'name' => ['required', 'string', 'max:50', $this->uniqueNameInGrade($request)->ignore($schoolClass->id)],
             'capacity' => 'nullable|integer|min:1',
-            'classroom_id' => ['nullable', 'exists:classrooms,id', $this->classroomNotTaken()->ignore($schoolClass->id)],
-            'class_teacher_id' => 'nullable|exists:teachers,id',
+            'classroom_id' => ['nullable', InstituteContext::exists('classrooms'), $this->classroomNotTaken()->ignore($schoolClass->id)],
+            'class_teacher_id' => ['nullable', InstituteContext::exists('teachers')],
             'class_teacher_first_period' => 'boolean',
             'status' => 'required|in:active,inactive',
         ], $this->messages());

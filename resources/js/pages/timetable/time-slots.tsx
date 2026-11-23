@@ -175,7 +175,7 @@ export default function TimeSlotsIndex({ timeSlots, weekDays }: { timeSlots: Tim
                         />
                     </FormField>
                 )}
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <FormField label="Starts" error={form.errors.start_time}>
                         <Input type="time" value={form.data.start_time} onChange={(e) => form.setData('start_time', e.target.value)} required />
                     </FormField>

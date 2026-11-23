@@ -32,7 +32,7 @@ class TeacherController extends Controller
             'max_periods_per_day' => 'required|integer|min:1|max:12',
             'max_periods_per_week' => 'required|integer|min:1|max:60',
             'subject_ids' => 'array',
-            'subject_ids.*' => 'exists:subjects,id',
+            'subject_ids.*' => InstituteContext::exists('subjects'),
         ]);
 
         $teacher = Teacher::onlyTrashed()->where('employee_no', $data['employee_no'])->first();
@@ -60,7 +60,7 @@ class TeacherController extends Controller
             'max_periods_per_week' => 'required|integer|min:1|max:60',
             'status' => 'required|in:active,inactive',
             'subject_ids' => 'array',
-            'subject_ids.*' => 'exists:subjects,id',
+            'subject_ids.*' => InstituteContext::exists('subjects'),
         ]);
 
         Teacher::onlyTrashed()->where('employee_no', $data['employee_no'])

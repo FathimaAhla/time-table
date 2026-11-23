@@ -50,6 +50,17 @@ type DashboardProps = {
     idleTeachers: number;
 };
 
+/** "2026-09-01T00:00:00.000000Z" -> "1 Sep 2026" (date part only, no timezone shift). */
+function formatDate(value: string): string {
+    const [year, month, day] = value.slice(0, 10).split('-').map(Number);
+
+    return new Date(year, month - 1, day).toLocaleDateString(undefined, {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+    });
+}
+
 function StatCard({ label, value, hint, icon: Icon, href }: { label: string; value: number; hint: string; icon: LucideIcon; href: string }) {
     return (
         <Link
@@ -102,7 +113,7 @@ export default function Dashboard({
                         <p className="text-sm text-muted-foreground">
                             {term ? (
                                 <>
-                                    Current term: <span className="font-medium text-foreground">{term.name}</span> · {term.start_date} → {term.end_date}
+                                    Current term: <span className="font-medium text-foreground">{term.name}</span> · {formatDate(term.start_date)} → {formatDate(term.end_date)}
                                 </>
                             ) : (
                                 'No current academic term is configured yet.'

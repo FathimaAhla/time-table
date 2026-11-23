@@ -12,6 +12,7 @@ use App\Models\Timetable;
 use App\Models\TimetableSession;
 use App\Models\WeekDay;
 use App\Services\TimetableGenerator;
+use App\Support\InstituteContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -199,8 +200,8 @@ class TimetableController extends Controller
     {
         $data = $request->validate([
             'session_id' => 'required|exists:timetable_sessions,id',
-            'week_day_id' => 'required|exists:week_days,id',
-            'time_slot_id' => 'required|exists:time_slots,id',
+            'week_day_id' => ['required', InstituteContext::exists('week_days')],
+            'time_slot_id' => ['required', InstituteContext::exists('time_slots')],
         ]);
 
         $session = TimetableSession::findOrFail($data['session_id']);

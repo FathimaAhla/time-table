@@ -7,6 +7,7 @@ use App\Models\Subject;
 use App\Models\Teacher;
 use App\Models\TeacherAssignment;
 use App\Models\Term;
+use App\Support\InstituteContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -37,10 +38,10 @@ class TeacherAssignmentController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'term_id' => 'required|exists:terms,id',
-            'school_class_id' => 'required|exists:school_classes,id',
-            'subject_id' => 'required|exists:subjects,id',
-            'teacher_id' => 'required|exists:teachers,id',
+            'term_id' => ['required', InstituteContext::exists('terms')],
+            'school_class_id' => ['required', InstituteContext::exists('school_classes')],
+            'subject_id' => ['required', InstituteContext::exists('subjects')],
+            'teacher_id' => ['required', InstituteContext::exists('teachers')],
             'weekly_periods' => 'required|integer|min:1|max:20',
         ]);
 
@@ -63,16 +64,16 @@ class TeacherAssignmentController extends Controller
     public function update(Request $request, TeacherAssignment $teacherAssignment): RedirectResponse
     {
         $data = $request->validate([
-            'school_class_id' => 'required|exists:school_classes,id',
+            'school_class_id' => ['required', InstituteContext::exists('school_classes')],
             'subject_id' => [
                 'required',
-                'exists:subjects,id',
+                InstituteContext::exists('subjects'),
                 Rule::unique('teacher_assignments')
                     ->where('term_id', $teacherAssignment->term_id)
                     ->where('school_class_id', $request->input('school_class_id'))
                     ->ignore($teacherAssignment->id),
             ],
-            'teacher_id' => 'required|exists:teachers,id',
+            'teacher_id' => ['required', InstituteContext::exists('teachers')],
             'weekly_periods' => 'required|integer|min:1|max:20',
         ], ['subject_id.unique' => 'This class already has a teacher assigned for that subject.']);
 

@@ -33,6 +33,7 @@ import { index as assignmentsIndex } from '@/routes/assignments';
 import { index as timeSlotsIndex } from '@/routes/time-slots';
 import { index as timetableIndex, mine as myTimetable, teachers as allTeacherTimetables } from '@/routes/timetable';
 import { index as institutesIndex } from '@/routes/institutes';
+import { index as usersIndex } from '@/routes/users';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -90,7 +91,7 @@ export function AppSidebar() {
         ...(isTeacher ? [{ title: 'My Timetable', href: myTimetable(), icon: CalendarDays }] : []),
         ...mainNavItems,
         { title: 'Teacher Timetables', href: allTeacherTimetables(), icon: Users },
-        ...(isSuperAdmin ? [{ title: 'Institutes', href: institutesIndex(), icon: Building2 }] : []),
+        ...(isSuperAdmin ? [{ title: 'Institutes', href: institutesIndex(), icon: Building2 }, { title: 'Users & Logins', href: usersIndex(), icon: Users }] : []),
     ];
 
     return (

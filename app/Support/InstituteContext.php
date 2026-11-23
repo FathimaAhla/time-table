@@ -5,6 +5,8 @@ namespace App\Support;
 use App\Models\Institute;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Exists;
 
 /**
  * Resolves which institute the current request should be scoped to.
@@ -58,5 +60,17 @@ class InstituteContext
         }
 
         Session::put('viewing_institute_id', $instituteId);
+    }
+
+    /**
+     * An "exists" validation rule restricted to the current institute, so a
+     * user can never reference another school's records by guessing an id.
+     */
+    public static function exists(string $table, string $column = 'id'): Exists
+    {
+        $rule = Rule::exists($table, $column);
+        $id = self::id();
+
+        return $id !== null ? $rule->where('institute_id', $id) : $rule;
     }
 }

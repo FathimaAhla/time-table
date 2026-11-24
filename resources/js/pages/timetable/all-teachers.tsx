@@ -2,6 +2,7 @@ import { Head, usePage } from '@inertiajs/react';
 import { FileDown, Users } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { matchesSearch, SearchBar } from '@/components/data-page';
+import { ColorfulToggle } from '@/components/colorful-toggle';
 import { TeacherTimetableGrid } from '@/components/teacher-timetable-grid';
 import { Button } from '@/components/ui/button';
 import { exportManyAsPdf } from '@/lib/export-timetable';
@@ -81,15 +82,18 @@ export default function AllTeachers({
                         out.
                     </p>
                 </div>
-                <Button
-                    onClick={downloadAll}
-                    disabled={progress !== null || shown.length === 0}
-                >
-                    <FileDown className="size-4" />
-                    {progress
-                        ? `Preparing ${progress}...`
-                        : `Download all (${shown.length}) as PDF`}
-                </Button>
+                <div className="flex flex-wrap gap-2">
+                    <ColorfulToggle />
+                    <Button
+                        onClick={downloadAll}
+                        disabled={progress !== null || shown.length === 0}
+                    >
+                        <FileDown className="size-4" />
+                        {progress
+                            ? `Preparing ${progress}...`
+                            : `Download all (${shown.length}) as PDF`}
+                    </Button>
+                </div>
             </div>
 
             <SearchBar

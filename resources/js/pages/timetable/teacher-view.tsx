@@ -1,6 +1,7 @@
 import { Head, usePage } from '@inertiajs/react';
 import { BookOpen, CalendarCheck, Coffee, School, UserX } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { ColorfulToggle } from '@/components/colorful-toggle';
 import { ExportMenu } from '@/components/export-menu';
 import { TeacherTimetableGrid } from '@/components/teacher-timetable-grid';
 import type { BreadcrumbItem } from '@/types';
@@ -109,10 +110,13 @@ export default function TeacherView({
                         this teacher takes
                     </p>
                 </div>
-                <ExportMenu
-                    elementId="teacher-timetable-grid"
-                    filename={`${teacher.full_name}-timetable`}
-                />
+                <div className="flex flex-wrap gap-2">
+                    <ColorfulToggle />
+                    <ExportMenu
+                        elementId="teacher-timetable-grid"
+                        filename={`${teacher.full_name}-timetable`}
+                    />
+                </div>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

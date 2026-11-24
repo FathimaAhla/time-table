@@ -7,9 +7,18 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { exportTimetableAsImage, exportTimetableAsPdf } from '@/lib/export-timetable';
+import {
+    exportTimetableAsImage,
+    exportTimetableAsPdf,
+} from '@/lib/export-timetable';
 
-export function ExportMenu({ elementId, filename }: { elementId: string; filename: string }) {
+export function ExportMenu({
+    elementId,
+    filename,
+}: {
+    elementId: string;
+    filename: string;
+}) {
     const [busy, setBusy] = useState(false);
 
     async function run(action: () => Promise<void>) {
@@ -30,9 +39,31 @@ export function ExportMenu({ elementId, filename }: { elementId: string; filenam
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => run(() => exportTimetableAsPdf(elementId, filename))}>Download as PDF</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => run(() => exportTimetableAsImage(elementId, filename, 'png'))}>Download as PNG</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => run(() => exportTimetableAsImage(elementId, filename, 'jpeg'))}>Download as JPG</DropdownMenuItem>
+                <DropdownMenuItem
+                    onClick={() =>
+                        run(() => exportTimetableAsPdf(elementId, filename))
+                    }
+                >
+                    Download as PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                    onClick={() =>
+                        run(() =>
+                            exportTimetableAsImage(elementId, filename, 'png'),
+                        )
+                    }
+                >
+                    Download as PNG
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                    onClick={() =>
+                        run(() =>
+                            exportTimetableAsImage(elementId, filename, 'jpeg'),
+                        )
+                    }
+                >
+                    Download as JPG
+                </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
     );

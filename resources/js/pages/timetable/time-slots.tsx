@@ -2,14 +2,30 @@ import { Head, router, useForm } from '@inertiajs/react';
 import { Clock } from 'lucide-react';
 import { useState } from 'react';
 import TimeSlotController from '@/actions/App/Http/Controllers/TimeSlotController';
-import { ConfirmDeleteModal, DataTable, EmptyRow, FormField, FormModal, PageHeader, RowActions } from '@/components/data-page';
+import {
+    ConfirmDeleteModal,
+    DataTable,
+    EmptyRow,
+    FormField,
+    FormModal,
+    PageHeader,
+    RowActions,
+} from '@/components/data-page';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import type { BreadcrumbItem } from '@/types';
 import type { TimeSlot, WeekDay } from '@/types/timetable';
 import { index as timeSlotsIndex } from '@/routes/time-slots';
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'School Day', href: timeSlotsIndex() }];
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'School Day', href: timeSlotsIndex() },
+];
 
 type SlotForm = {
     slot_type: TimeSlot['slot_type'];
@@ -21,14 +37,30 @@ type SlotForm = {
 };
 
 function slotLabel(slot: TimeSlot): string {
-    return (slot.slot_type === 'fixed' ? slot.fixed_activity_name : slot.name) ?? '';
+    return (
+        (slot.slot_type === 'fixed' ? slot.fixed_activity_name : slot.name) ??
+        ''
+    );
 }
 
-export default function TimeSlotsIndex({ timeSlots, weekDays }: { timeSlots: TimeSlot[]; weekDays: WeekDay[] }) {
+export default function TimeSlotsIndex({
+    timeSlots,
+    weekDays,
+}: {
+    timeSlots: TimeSlot[];
+    weekDays: WeekDay[];
+}) {
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing] = useState<TimeSlot | null>(null);
     const [deleting, setDeleting] = useState<TimeSlot | null>(null);
-    const form = useForm<SlotForm>({ slot_type: 'period', name: '', fixed_activity_name: '', start_time: '', end_time: '', sort_order: '' });
+    const form = useForm<SlotForm>({
+        slot_type: 'period',
+        name: '',
+        fixed_activity_name: '',
+        start_time: '',
+        end_time: '',
+        sort_order: '',
+    });
 
     function openCreate() {
         setEditing(null);
@@ -62,11 +94,19 @@ export default function TimeSlotsIndex({ timeSlots, weekDays }: { timeSlots: Tim
     function submit() {
         form.transform((data) => ({
             ...data,
-            name: data.name || (data.slot_type === 'fixed' ? data.fixed_activity_name : 'Period'),
-            fixed_activity_name: data.slot_type === 'fixed' ? data.fixed_activity_name : null,
+            name:
+                data.name ||
+                (data.slot_type === 'fixed'
+                    ? data.fixed_activity_name
+                    : 'Period'),
+            fixed_activity_name:
+                data.slot_type === 'fixed' ? data.fixed_activity_name : null,
         }));
 
-        const options = { preserveScroll: true, onSuccess: () => setModalOpen(false) };
+        const options = {
+            preserveScroll: true,
+            onSuccess: () => setModalOpen(false),
+        };
 
         if (editing) {
             form.put(TimeSlotController.update.url(editing.id), options);
@@ -90,7 +130,10 @@ export default function TimeSlotsIndex({ timeSlots, weekDays }: { timeSlots: Tim
             <div className="flex flex-wrap items-center gap-2 text-sm">
                 <span className="font-medium">School days:</span>
                 {weekDays.map((d) => (
-                    <span key={d.id} className="rounded-full border px-3 py-0.5 text-xs">
+                    <span
+                        key={d.id}
+                        className="rounded-full border px-3 py-0.5 text-xs"
+                    >
                         {d.name}
                     </span>
                 ))}
@@ -108,11 +151,21 @@ export default function TimeSlotsIndex({ timeSlots, weekDays }: { timeSlots: Tim
                 }
             >
                 {timeSlots.map((slot) => (
-                    <tr key={slot.id} className={slot.slot_type === 'fixed' ? 'bg-muted/30' : undefined}>
-                        <td className="text-muted-foreground">{slot.sort_order}</td>
+                    <tr
+                        key={slot.id}
+                        className={
+                            slot.slot_type === 'fixed'
+                                ? 'bg-muted/30'
+                                : undefined
+                        }
+                    >
+                        <td className="text-muted-foreground">
+                            {slot.sort_order}
+                        </td>
                         <td className="font-medium">{slotLabel(slot)}</td>
                         <td className="font-mono text-xs">
-                            {slot.start_time.slice(0, 5)} – {slot.end_time.slice(0, 5)}
+                            {slot.start_time.slice(0, 5)} –{' '}
+                            {slot.end_time.slice(0, 5)}
                         </td>
                         <td>
                             <span
@@ -122,11 +175,16 @@ export default function TimeSlotsIndex({ timeSlots, weekDays }: { timeSlots: Tim
                                         : 'rounded-full bg-orange-50 px-2 py-0.5 text-xs font-medium text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'
                                 }
                             >
-                                {slot.slot_type === 'period' ? 'Teaching period' : 'Break / activity'}
+                                {slot.slot_type === 'period'
+                                    ? 'Teaching period'
+                                    : 'Break / activity'}
                             </span>
                         </td>
                         <td className="text-right">
-                            <RowActions onEdit={() => openEdit(slot)} onDelete={() => setDeleting(slot)} />
+                            <RowActions
+                                onEdit={() => openEdit(slot)}
+                                onDelete={() => setDeleting(slot)}
+                            />
                         </td>
                     </tr>
                 ))}
@@ -151,39 +209,85 @@ export default function TimeSlotsIndex({ timeSlots, weekDays }: { timeSlots: Tim
                 onSubmit={submit}
             >
                 <FormField label="Type" error={form.errors.slot_type}>
-                    <Select value={form.data.slot_type} onValueChange={(value) => form.setData('slot_type', value as TimeSlot['slot_type'])}>
+                    <Select
+                        value={form.data.slot_type}
+                        onValueChange={(value) =>
+                            form.setData(
+                                'slot_type',
+                                value as TimeSlot['slot_type'],
+                            )
+                        }
+                    >
                         <SelectTrigger>
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="period">Teaching period</SelectItem>
-                            <SelectItem value="fixed">Break / activity</SelectItem>
+                            <SelectItem value="period">
+                                Teaching period
+                            </SelectItem>
+                            <SelectItem value="fixed">
+                                Break / activity
+                            </SelectItem>
                         </SelectContent>
                     </Select>
                 </FormField>
                 {form.data.slot_type === 'period' ? (
                     <FormField label="Name" error={form.errors.name}>
-                        <Input value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} placeholder="e.g. Period 1" />
+                        <Input
+                            value={form.data.name}
+                            onChange={(e) =>
+                                form.setData('name', e.target.value)
+                            }
+                            placeholder="e.g. Period 1"
+                        />
                     </FormField>
                 ) : (
-                    <FormField label="Activity" error={form.errors.fixed_activity_name}>
+                    <FormField
+                        label="Activity"
+                        error={form.errors.fixed_activity_name}
+                    >
                         <Input
                             value={form.data.fixed_activity_name}
-                            onChange={(e) => form.setData('fixed_activity_name', e.target.value)}
+                            onChange={(e) =>
+                                form.setData(
+                                    'fixed_activity_name',
+                                    e.target.value,
+                                )
+                            }
                             placeholder="e.g. Lunch Break"
                             required
                         />
                     </FormField>
                 )}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <FormField label="Starts" error={form.errors.start_time}>
-                        <Input type="time" value={form.data.start_time} onChange={(e) => form.setData('start_time', e.target.value)} required />
+                        <Input
+                            type="time"
+                            value={form.data.start_time}
+                            onChange={(e) =>
+                                form.setData('start_time', e.target.value)
+                            }
+                            required
+                        />
                     </FormField>
                     <FormField label="Ends" error={form.errors.end_time}>
-                        <Input type="time" value={form.data.end_time} onChange={(e) => form.setData('end_time', e.target.value)} required />
+                        <Input
+                            type="time"
+                            value={form.data.end_time}
+                            onChange={(e) =>
+                                form.setData('end_time', e.target.value)
+                            }
+                            required
+                        />
                     </FormField>
                     <FormField label="Order" error={form.errors.sort_order}>
-                        <Input type="number" value={form.data.sort_order} onChange={(e) => form.setData('sort_order', e.target.value)} />
+                        <Input
+                            type="number"
+                            value={form.data.sort_order}
+                            onChange={(e) =>
+                                form.setData('sort_order', e.target.value)
+                            }
+                        />
                     </FormField>
                 </div>
             </FormModal>
@@ -193,7 +297,12 @@ export default function TimeSlotsIndex({ timeSlots, weekDays }: { timeSlots: Tim
                 onOpenChange={(open) => !open && setDeleting(null)}
                 title="Delete Time Slot"
                 message={`Delete ${deleting ? slotLabel(deleting) : ''}? Lessons scheduled in it will be removed.`}
-                onConfirm={() => deleting && router.delete(TimeSlotController.destroy.url(deleting.id), { preserveScroll: true })}
+                onConfirm={() =>
+                    deleting &&
+                    router.delete(TimeSlotController.destroy.url(deleting.id), {
+                        preserveScroll: true,
+                    })
+                }
             />
         </div>
     );

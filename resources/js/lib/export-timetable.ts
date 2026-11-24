@@ -19,7 +19,9 @@ const COLOR_PROPS = [
  * html2canvas actually rasterizes, so the live page is never touched.
  */
 function flattenModernColors(clonedDoc: Document) {
-    const probe = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+    const probe = document
+        .createElement('canvas')
+        .getContext('2d', { willReadFrequently: true });
     if (!probe) return;
     probe.canvas.width = 1;
     probe.canvas.height = 1;
@@ -31,7 +33,8 @@ function flattenModernColors(clonedDoc: Document) {
     // Rasterizing a pixel and reading it back always yields real sRGB bytes, so do that
     // instead; a transparent (alpha 0) pixel means the source had alpha baked in oklch(... / a).
     const toRgb = (value: string): string | null => {
-        if (!value || !/\b(oklch|oklab|lab|lch|color)\(/i.test(value)) return null;
+        if (!value || !/\b(oklch|oklab|lab|lch|color)\(/i.test(value))
+            return null;
         if (cache.has(value)) return cache.get(value)!;
 
         let result: string | null = null;
@@ -40,7 +43,10 @@ function flattenModernColors(clonedDoc: Document) {
             probe.fillStyle = value;
             probe.fillRect(0, 0, 1, 1);
             const [r, g, b, a] = probe.getImageData(0, 0, 1, 1).data;
-            result = a === 255 ? `rgb(${r}, ${g}, ${b})` : `rgba(${r}, ${g}, ${b}, ${(a / 255).toFixed(3)})`;
+            result =
+                a === 255
+                    ? `rgb(${r}, ${g}, ${b})`
+                    : `rgba(${r}, ${g}, ${b}, ${(a / 255).toFixed(3)})`;
         } catch {
             result = null;
         }
@@ -74,15 +80,25 @@ async function renderToCanvas(elementId: string): Promise<HTMLCanvasElement> {
     });
 }
 
-export async function exportTimetableAsImage(elementId: string, filename: string, format: 'png' | 'jpeg' = 'png') {
+export async function exportTimetableAsImage(
+    elementId: string,
+    filename: string,
+    format: 'png' | 'jpeg' = 'png',
+) {
     const canvas = await renderToCanvas(elementId);
     const link = document.createElement('a');
     link.download = `${filename}.${format === 'jpeg' ? 'jpg' : 'png'}`;
-    link.href = canvas.toDataURL(format === 'jpeg' ? 'image/jpeg' : 'image/png', 0.95);
+    link.href = canvas.toDataURL(
+        format === 'jpeg' ? 'image/jpeg' : 'image/png',
+        0.95,
+    );
     link.click();
 }
 
-export async function exportTimetableAsPdf(elementId: string, filename: string) {
+export async function exportTimetableAsPdf(
+    elementId: string,
+    filename: string,
+) {
     const canvas = await renderToCanvas(elementId);
     const imgData = canvas.toDataURL('image/png', 1.0);
 
@@ -91,11 +107,21 @@ export async function exportTimetableAsPdf(elementId: string, filename: string) 
 
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const ratio = Math.min(pageWidth / canvas.width, pageHeight / canvas.height);
+    const ratio = Math.min(
+        pageWidth / canvas.width,
+        pageHeight / canvas.height,
+    );
     const width = canvas.width * ratio;
     const height = canvas.height * ratio;
 
-    pdf.addImage(imgData, 'PNG', (pageWidth - width) / 2, (pageHeight - height) / 2, width, height);
+    pdf.addImage(
+        imgData,
+        'PNG',
+        (pageWidth - width) / 2,
+        (pageHeight - height) / 2,
+        width,
+        height,
+    );
     pdf.save(`${filename}.pdf`);
 }
 
@@ -103,12 +129,17 @@ export async function exportTimetableAsPdf(elementId: string, filename: string) 
  * Export several timetables into one PDF, one per A4 page
  * (e.g. every teacher's timetable for printing and handing out).
  */
-export async function exportManyAsPdf(elementIds: string[], filename: string, onProgress?: (done: number, total: number) => void) {
+export async function exportManyAsPdf(
+    elementIds: string[],
+    filename: string,
+    onProgress?: (done: number, total: number) => void,
+) {
     let pdf: jsPDF | null = null;
 
     for (const [index, elementId] of elementIds.entries()) {
         const canvas = await renderToCanvas(elementId);
-        const orientation = canvas.width > canvas.height ? 'landscape' : 'portrait';
+        const orientation =
+            canvas.width > canvas.height ? 'landscape' : 'portrait';
 
         if (pdf === null) {
             pdf = new jsPDF({ orientation, unit: 'pt', format: 'a4' });
@@ -119,11 +150,21 @@ export async function exportManyAsPdf(elementIds: string[], filename: string, on
         const pageWidth = pdf.internal.pageSize.getWidth();
         const pageHeight = pdf.internal.pageSize.getHeight();
         const margin = 24;
-        const ratio = Math.min((pageWidth - margin * 2) / canvas.width, (pageHeight - margin * 2) / canvas.height);
+        const ratio = Math.min(
+            (pageWidth - margin * 2) / canvas.width,
+            (pageHeight - margin * 2) / canvas.height,
+        );
         const width = canvas.width * ratio;
         const height = canvas.height * ratio;
 
-        pdf.addImage(canvas.toDataURL('image/png', 1.0), 'PNG', (pageWidth - width) / 2, margin, width, height);
+        pdf.addImage(
+            canvas.toDataURL('image/png', 1.0),
+            'PNG',
+            (pageWidth - width) / 2,
+            margin,
+            width,
+            height,
+        );
         onProgress?.(index + 1, elementIds.length);
     }
 

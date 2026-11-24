@@ -14,25 +14,66 @@ import {
     SearchBar,
 } from '@/components/data-page';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import type { BreadcrumbItem } from '@/types';
-import type { SchoolClass, Subject, Teacher, TeacherAssignment, Term } from '@/types/timetable';
+import type {
+    SchoolClass,
+    Subject,
+    Teacher,
+    TeacherAssignment,
+    Term,
+} from '@/types/timetable';
 import { index as assignmentsIndex } from '@/routes/assignments';
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Subject Allocation', href: assignmentsIndex() }];
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Subject Allocation', href: assignmentsIndex() },
+];
 
-const syncBadge: Record<TeacherAssignment['sync_status'], { label: string; className: string }> = {
-    synced: { label: 'On timetable', className: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' },
-    pending: { label: 'Needs scheduling', className: 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
-    orphaned: { label: 'Removed', className: 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300' },
+const syncBadge: Record<
+    TeacherAssignment['sync_status'],
+    { label: string; className: string }
+> = {
+    synced: {
+        label: 'On timetable',
+        className:
+            'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
+    },
+    pending: {
+        label: 'Needs scheduling',
+        className:
+            'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+    },
+    orphaned: {
+        label: 'Removed',
+        className:
+            'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+    },
 };
 
-type AssignmentForm = { school_class_id: string; subject_id: string; teacher_id: string; weekly_periods: string };
+type AssignmentForm = {
+    school_class_id: string;
+    subject_id: string;
+    teacher_id: string;
+    weekly_periods: string;
+};
 
-const emptyForm: AssignmentForm = { school_class_id: '', subject_id: '', teacher_id: '', weekly_periods: '4' };
+const emptyForm: AssignmentForm = {
+    school_class_id: '',
+    subject_id: '',
+    teacher_id: '',
+    weekly_periods: '4',
+};
 
 function classLabel(schoolClass?: SchoolClass): string {
-    return schoolClass ? `${schoolClass.grade?.name ?? ''}${schoolClass.name}` : '';
+    return schoolClass
+        ? `${schoolClass.grade?.name ?? ''}${schoolClass.name}`
+        : '';
 }
 
 export default function Assignments({
@@ -60,14 +101,19 @@ export default function Assignments({
             return teachers;
         }
 
-        return teachers.filter((t) => t.subjects?.some((s) => s.id === Number(form.data.subject_id)));
+        return teachers.filter((t) =>
+            t.subjects?.some((s) => s.id === Number(form.data.subject_id)),
+        );
     }, [form.data.subject_id, teachers]);
 
     const teacherLoad = useMemo(() => {
         const load = new Map<number, number>();
         assignments.forEach((a) => {
             if (a.status === 'active') {
-                load.set(a.teacher_id, (load.get(a.teacher_id) ?? 0) + a.weekly_periods);
+                load.set(
+                    a.teacher_id,
+                    (load.get(a.teacher_id) ?? 0) + a.weekly_periods,
+                );
             }
         });
 
@@ -76,13 +122,22 @@ export default function Assignments({
 
     const rows = assignments.filter(
         (a) =>
-            (classFilter === 'all' || String(a.school_class_id) === classFilter) &&
-            matchesSearch(search, classLabel(a.school_class), a.subject?.name, a.teacher?.full_name),
+            (classFilter === 'all' ||
+                String(a.school_class_id) === classFilter) &&
+            matchesSearch(
+                search,
+                classLabel(a.school_class),
+                a.subject?.name,
+                a.teacher?.full_name,
+            ),
     );
 
     function openCreate() {
         setEditing(null);
-        form.setData({ ...emptyForm, school_class_id: classFilter !== 'all' ? classFilter : '' });
+        form.setData({
+            ...emptyForm,
+            school_class_id: classFilter !== 'all' ? classFilter : '',
+        });
         form.clearErrors();
         setModalOpen(true);
     }
@@ -100,10 +155,16 @@ export default function Assignments({
     }
 
     function submit() {
-        const options = { preserveScroll: true, onSuccess: () => setModalOpen(false) };
+        const options = {
+            preserveScroll: true,
+            onSuccess: () => setModalOpen(false),
+        };
 
         if (editing) {
-            form.put(TeacherAssignmentController.update.url(editing.id), options);
+            form.put(
+                TeacherAssignmentController.update.url(editing.id),
+                options,
+            );
 
             return;
         }
@@ -116,7 +177,9 @@ export default function Assignments({
         return (
             <div className="p-4 md:p-6">
                 <Head title="Subject Allocation" />
-                <p className="text-muted-foreground">No current school term is set up yet.</p>
+                <p className="text-muted-foreground">
+                    No current school term is set up yet.
+                </p>
             </div>
         );
     }
@@ -130,7 +193,11 @@ export default function Assignments({
                 createLabel="Allocate Subject"
                 onCreate={openCreate}
             />
-            <SearchBar value={search} onChange={setSearch} placeholder="Search class, subject or teacher...">
+            <SearchBar
+                value={search}
+                onChange={setSearch}
+                placeholder="Search class, subject or teacher..."
+            >
                 <Select value={classFilter} onValueChange={setClassFilter}>
                     <SelectTrigger className="w-full md:w-44">
                         <SelectValue />
@@ -171,12 +238,17 @@ export default function Assignments({
                         <td>{a.teacher?.full_name}</td>
                         <td>{a.weekly_periods}</td>
                         <td>
-                            <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${syncBadge[a.sync_status].className}`}>
+                            <span
+                                className={`rounded-full px-2 py-0.5 text-xs font-medium ${syncBadge[a.sync_status].className}`}
+                            >
                                 {syncBadge[a.sync_status].label}
                             </span>
                         </td>
                         <td className="text-right">
-                            <RowActions onEdit={() => openEdit(a)} onDelete={() => setDeleting(a)} />
+                            <RowActions
+                                onEdit={() => openEdit(a)}
+                                onDelete={() => setDeleting(a)}
+                            />
                         </td>
                     </tr>
                 ))}
@@ -202,7 +274,12 @@ export default function Assignments({
                 onSubmit={submit}
             >
                 <FormField label="Class" error={form.errors.school_class_id}>
-                    <Select value={form.data.school_class_id} onValueChange={(value) => form.setData('school_class_id', value)}>
+                    <Select
+                        value={form.data.school_class_id}
+                        onValueChange={(value) =>
+                            form.setData('school_class_id', value)
+                        }
+                    >
                         <SelectTrigger>
                             <SelectValue placeholder="Select class" />
                         </SelectTrigger>
@@ -218,7 +295,13 @@ export default function Assignments({
                 <FormField label="Subject" error={form.errors.subject_id}>
                     <Select
                         value={form.data.subject_id}
-                        onValueChange={(value) => form.setData((data) => ({ ...data, subject_id: value, teacher_id: '' }))}
+                        onValueChange={(value) =>
+                            form.setData((data) => ({
+                                ...data,
+                                subject_id: value,
+                                teacher_id: '',
+                            }))
+                        }
                     >
                         <SelectTrigger>
                             <SelectValue placeholder="Select subject" />
@@ -233,26 +316,37 @@ export default function Assignments({
                     </Select>
                 </FormField>
                 <FormField label="Teacher" error={form.errors.teacher_id}>
-                    <Select value={form.data.teacher_id} onValueChange={(value) => form.setData('teacher_id', value)}>
+                    <Select
+                        value={form.data.teacher_id}
+                        onValueChange={(value) =>
+                            form.setData('teacher_id', value)
+                        }
+                    >
                         <SelectTrigger>
                             <SelectValue placeholder="Select teacher" />
                         </SelectTrigger>
                         <SelectContent>
                             {qualifiedTeachers.map((t) => (
                                 <SelectItem key={t.id} value={String(t.id)}>
-                                    {t.full_name} ({teacherLoad.get(t.id) ?? 0}/{t.max_periods_per_week} periods/wk)
+                                    {t.full_name} ({teacherLoad.get(t.id) ?? 0}/
+                                    {t.max_periods_per_week} periods/wk)
                                 </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
                 </FormField>
-                <FormField label="Periods per week" error={form.errors.weekly_periods}>
+                <FormField
+                    label="Periods per week"
+                    error={form.errors.weekly_periods}
+                >
                     <Input
                         type="number"
                         min={1}
                         max={20}
                         value={form.data.weekly_periods}
-                        onChange={(e) => form.setData('weekly_periods', e.target.value)}
+                        onChange={(e) =>
+                            form.setData('weekly_periods', e.target.value)
+                        }
                     />
                 </FormField>
             </FormModal>
@@ -262,7 +356,13 @@ export default function Assignments({
                 onOpenChange={(open) => !open && setDeleting(null)}
                 title="Remove Allocation"
                 message={`Remove ${deleting?.subject?.name} for class ${classLabel(deleting?.school_class)}? The class timetable will be flagged for review.`}
-                onConfirm={() => deleting && router.delete(TeacherAssignmentController.destroy.url(deleting.id), { preserveScroll: true })}
+                onConfirm={() =>
+                    deleting &&
+                    router.delete(
+                        TeacherAssignmentController.destroy.url(deleting.id),
+                        { preserveScroll: true },
+                    )
+                }
             />
         </div>
     );

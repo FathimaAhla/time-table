@@ -15,18 +15,40 @@ import {
     StatusBadge,
 } from '@/components/data-page';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import type { BreadcrumbItem } from '@/types';
 import type { Classroom } from '@/types/timetable';
 import { index as classroomsIndex } from '@/routes/classrooms';
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Classrooms', href: classroomsIndex() }];
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Classrooms', href: classroomsIndex() },
+];
 
-type ClassroomForm = { name: string; building: string; capacity: string; status: Classroom['status'] };
+type ClassroomForm = {
+    name: string;
+    building: string;
+    capacity: string;
+    status: Classroom['status'];
+};
 
-const emptyForm: ClassroomForm = { name: '', building: '', capacity: '', status: 'active' };
+const emptyForm: ClassroomForm = {
+    name: '',
+    building: '',
+    capacity: '',
+    status: 'active',
+};
 
-export default function ClassroomsIndex({ classrooms }: { classrooms: Classroom[] }) {
+export default function ClassroomsIndex({
+    classrooms,
+}: {
+    classrooms: Classroom[];
+}) {
     const [search, setSearch] = useState('');
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing] = useState<Classroom | null>(null);
@@ -34,7 +56,9 @@ export default function ClassroomsIndex({ classrooms }: { classrooms: Classroom[
     const form = useForm<ClassroomForm>(emptyForm);
 
     const rows = classrooms.filter((room) => {
-        const assigned = room.school_class ? `${room.school_class.grade?.name ?? ''}${room.school_class.name}` : '';
+        const assigned = room.school_class
+            ? `${room.school_class.grade?.name ?? ''}${room.school_class.name}`
+            : '';
 
         return matchesSearch(search, room.name, room.building, assigned);
     });
@@ -49,12 +73,20 @@ export default function ClassroomsIndex({ classrooms }: { classrooms: Classroom[
     function openEdit(room: Classroom) {
         setEditing(room);
         form.clearErrors();
-        form.setData({ name: room.name, building: room.building ?? '', capacity: String(room.capacity), status: room.status });
+        form.setData({
+            name: room.name,
+            building: room.building ?? '',
+            capacity: String(room.capacity),
+            status: room.status,
+        });
         setModalOpen(true);
     }
 
     function submit() {
-        const options = { preserveScroll: true, onSuccess: () => setModalOpen(false) };
+        const options = {
+            preserveScroll: true,
+            onSuccess: () => setModalOpen(false),
+        };
 
         if (editing) {
             form.put(ClassroomController.update.url(editing.id), options);
@@ -74,7 +106,11 @@ export default function ClassroomsIndex({ classrooms }: { classrooms: Classroom[
                 createLabel="New Classroom"
                 onCreate={openCreate}
             />
-            <SearchBar value={search} onChange={setSearch} placeholder="Search rooms, buildings or classes..." />
+            <SearchBar
+                value={search}
+                onChange={setSearch}
+                placeholder="Search rooms, buildings or classes..."
+            />
 
             <DataTable
                 head={
@@ -102,14 +138,19 @@ export default function ClassroomsIndex({ classrooms }: { classrooms: Classroom[
                                     {room.school_class.name}
                                 </span>
                             ) : (
-                                <span className="text-muted-foreground">Available</span>
+                                <span className="text-muted-foreground">
+                                    Available
+                                </span>
                             )}
                         </td>
                         <td>
                             <StatusBadge status={room.status} />
                         </td>
                         <td className="text-right">
-                            <RowActions onEdit={() => openEdit(room)} onDelete={() => setDeleting(room)} />
+                            <RowActions
+                                onEdit={() => openEdit(room)}
+                                onDelete={() => setDeleting(room)}
+                            />
                         </td>
                     </tr>
                 ))}
@@ -135,30 +176,54 @@ export default function ClassroomsIndex({ classrooms }: { classrooms: Classroom[
                 onSubmit={submit}
             >
                 <FormField label="Room name" error={form.errors.name}>
-                    <Input value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} placeholder="e.g. Room 101" autoFocus required />
+                    <Input
+                        value={form.data.name}
+                        onChange={(e) => form.setData('name', e.target.value)}
+                        placeholder="e.g. Room 101"
+                        autoFocus
+                        required
+                    />
                 </FormField>
                 <FormField label="Building" error={form.errors.building}>
-                    <Input value={form.data.building} onChange={(e) => form.setData('building', e.target.value)} placeholder="e.g. Main Block" />
+                    <Input
+                        value={form.data.building}
+                        onChange={(e) =>
+                            form.setData('building', e.target.value)
+                        }
+                        placeholder="e.g. Main Block"
+                    />
                 </FormField>
                 <FormField label="Seats" error={form.errors.capacity}>
                     <Input
                         type="number"
                         min={1}
                         value={form.data.capacity}
-                        onChange={(e) => form.setData('capacity', e.target.value)}
+                        onChange={(e) =>
+                            form.setData('capacity', e.target.value)
+                        }
                         placeholder="e.g. 40"
                         required
                     />
                 </FormField>
                 {editing && (
                     <FormField label="Status" error={form.errors.status}>
-                        <Select value={form.data.status} onValueChange={(value) => form.setData('status', value as Classroom['status'])}>
+                        <Select
+                            value={form.data.status}
+                            onValueChange={(value) =>
+                                form.setData(
+                                    'status',
+                                    value as Classroom['status'],
+                                )
+                            }
+                        >
                             <SelectTrigger>
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="active">Active</SelectItem>
-                                <SelectItem value="inactive">Inactive</SelectItem>
+                                <SelectItem value="inactive">
+                                    Inactive
+                                </SelectItem>
                             </SelectContent>
                         </Select>
                     </FormField>
@@ -170,7 +235,13 @@ export default function ClassroomsIndex({ classrooms }: { classrooms: Classroom[
                 onOpenChange={(open) => !open && setDeleting(null)}
                 title="Delete Classroom"
                 message={`Delete ${deleting?.name}? Any class using it will be left without a room.`}
-                onConfirm={() => deleting && router.delete(ClassroomController.destroy.url(deleting.id), { preserveScroll: true })}
+                onConfirm={() =>
+                    deleting &&
+                    router.delete(
+                        ClassroomController.destroy.url(deleting.id),
+                        { preserveScroll: true },
+                    )
+                }
             />
         </div>
     );

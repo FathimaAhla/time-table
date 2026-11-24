@@ -15,12 +15,20 @@ import {
     StatusBadge,
 } from '@/components/data-page';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import type { BreadcrumbItem } from '@/types';
 import type { Classroom, Grade, SchoolClass, Teacher } from '@/types/timetable';
 import { index as classesIndex } from '@/routes/classes';
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Classes', href: classesIndex() }];
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Classes', href: classesIndex() },
+];
 
 const NONE = 'none';
 
@@ -69,17 +77,36 @@ export default function ClassesIndex({
     const rows = classes.filter(
         (c) =>
             (gradeFilter === 'all' || String(c.grade_id) === gradeFilter) &&
-            matchesSearch(search, className(c), c.class_teacher?.full_name, c.classroom?.name),
+            matchesSearch(
+                search,
+                className(c),
+                c.class_teacher?.full_name,
+                c.classroom?.name,
+            ),
     );
 
-    const takenClassroomIds = new Set(classes.filter((c) => c.id !== editing?.id && c.classroom_id).map((c) => c.classroom_id));
-    const selectedRoom = classrooms.find((room) => String(room.id) === form.data.classroom_id);
-    const overCapacity = selectedRoom && form.data.capacity !== '' && Number(form.data.capacity) > selectedRoom.capacity;
-    const selectedGrade = grades.find((g) => String(g.id) === form.data.grade_id);
+    const takenClassroomIds = new Set(
+        classes
+            .filter((c) => c.id !== editing?.id && c.classroom_id)
+            .map((c) => c.classroom_id),
+    );
+    const selectedRoom = classrooms.find(
+        (room) => String(room.id) === form.data.classroom_id,
+    );
+    const overCapacity =
+        selectedRoom &&
+        form.data.capacity !== '' &&
+        Number(form.data.capacity) > selectedRoom.capacity;
+    const selectedGrade = grades.find(
+        (g) => String(g.id) === form.data.grade_id,
+    );
 
     function openCreate() {
         setEditing(null);
-        form.setData({ ...emptyForm, grade_id: gradeFilter !== 'all' ? gradeFilter : '' });
+        form.setData({
+            ...emptyForm,
+            grade_id: gradeFilter !== 'all' ? gradeFilter : '',
+        });
         form.clearErrors();
         setModalOpen(true);
     }
@@ -91,8 +118,12 @@ export default function ClassesIndex({
             grade_id: String(schoolClass.grade_id),
             name: schoolClass.name,
             capacity: schoolClass.capacity ? String(schoolClass.capacity) : '',
-            classroom_id: schoolClass.classroom_id ? String(schoolClass.classroom_id) : NONE,
-            class_teacher_id: schoolClass.class_teacher_id ? String(schoolClass.class_teacher_id) : NONE,
+            classroom_id: schoolClass.classroom_id
+                ? String(schoolClass.classroom_id)
+                : NONE,
+            class_teacher_id: schoolClass.class_teacher_id
+                ? String(schoolClass.class_teacher_id)
+                : NONE,
             class_teacher_first_period: schoolClass.class_teacher_first_period,
             status: schoolClass.status,
         });
@@ -105,10 +136,14 @@ export default function ClassesIndex({
             name: data.name.trim().toUpperCase(),
             capacity: data.capacity || null,
             classroom_id: data.classroom_id === NONE ? null : data.classroom_id,
-            class_teacher_id: data.class_teacher_id === NONE ? null : data.class_teacher_id,
+            class_teacher_id:
+                data.class_teacher_id === NONE ? null : data.class_teacher_id,
         }));
 
-        const options = { preserveScroll: true, onSuccess: () => setModalOpen(false) };
+        const options = {
+            preserveScroll: true,
+            onSuccess: () => setModalOpen(false),
+        };
 
         if (editing) {
             form.put(SchoolClassController.update.url(editing.id), options);
@@ -128,7 +163,11 @@ export default function ClassesIndex({
                 createLabel="New Class"
                 onCreate={openCreate}
             />
-            <SearchBar value={search} onChange={setSearch} placeholder="Search classes, teachers or rooms...">
+            <SearchBar
+                value={search}
+                onChange={setSearch}
+                placeholder="Search classes, teachers or rooms..."
+            >
                 <Select value={gradeFilter} onValueChange={setGradeFilter}>
                     <SelectTrigger className="w-full md:w-44">
                         <SelectValue />
@@ -170,22 +209,33 @@ export default function ClassesIndex({
                         <td>
                             {c.classroom ? (
                                 <div>
-                                    <div className="font-medium">{c.classroom.name}</div>
+                                    <div className="font-medium">
+                                        {c.classroom.name}
+                                    </div>
                                     <div className="text-xs text-muted-foreground">
-                                        {c.classroom.building ? `${c.classroom.building} · ` : ''}seats {c.classroom.capacity}
+                                        {c.classroom.building
+                                            ? `${c.classroom.building} · `
+                                            : ''}
+                                        seats {c.classroom.capacity}
                                     </div>
                                 </div>
                             ) : (
-                                <span className="text-muted-foreground">Not assigned</span>
+                                <span className="text-muted-foreground">
+                                    Not assigned
+                                </span>
                             )}
                         </td>
                         <td>{c.capacity ?? '—'}</td>
                         <td>
                             {c.class_teacher ? (
                                 <div>
-                                    <div className="font-medium">{c.class_teacher.full_name}</div>
+                                    <div className="font-medium">
+                                        {c.class_teacher.full_name}
+                                    </div>
                                     <div className="text-xs text-muted-foreground">
-                                        {c.class_teacher_first_period ? 'Takes the first period' : 'First period not reserved'}
+                                        {c.class_teacher_first_period
+                                            ? 'Takes the first period'
+                                            : 'First period not reserved'}
                                     </div>
                                 </div>
                             ) : (
@@ -196,7 +246,10 @@ export default function ClassesIndex({
                             <StatusBadge status={c.status} />
                         </td>
                         <td className="text-right">
-                            <RowActions onEdit={() => openEdit(c)} onDelete={() => setDeleting(c)} />
+                            <RowActions
+                                onEdit={() => openEdit(c)}
+                                onDelete={() => setDeleting(c)}
+                            />
                         </td>
                     </tr>
                 ))}
@@ -215,16 +268,25 @@ export default function ClassesIndex({
             <FormModal
                 open={modalOpen}
                 onOpenChange={setModalOpen}
-                title={editing ? `Edit Class ${className(editing)}` : 'Create Class'}
+                title={
+                    editing
+                        ? `Edit Class ${className(editing)}`
+                        : 'Create Class'
+                }
                 description="Pick the grade and a section letter. Grade 1 + A makes class 1A."
                 submitLabel={editing ? 'Update Class' : 'Create Class'}
                 processing={form.processing}
                 onSubmit={submit}
                 className="sm:max-w-lg"
             >
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <FormField label="Grade" error={form.errors.grade_id}>
-                        <Select value={form.data.grade_id} onValueChange={(value) => form.setData('grade_id', value)}>
+                        <Select
+                            value={form.data.grade_id}
+                            onValueChange={(value) =>
+                                form.setData('grade_id', value)
+                            }
+                        >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select grade" />
                             </SelectTrigger>
@@ -240,11 +302,17 @@ export default function ClassesIndex({
                     <FormField
                         label="Section"
                         error={form.errors.name}
-                        hint={selectedGrade && form.data.name ? `Class ${selectedGrade.name}${form.data.name.toUpperCase()}` : 'e.g. A, B, C'}
+                        hint={
+                            selectedGrade && form.data.name
+                                ? `Class ${selectedGrade.name}${form.data.name.toUpperCase()}`
+                                : 'e.g. A, B, C'
+                        }
                     >
                         <Input
                             value={form.data.name}
-                            onChange={(e) => form.setData('name', e.target.value)}
+                            onChange={(e) =>
+                                form.setData('name', e.target.value)
+                            }
                             placeholder="A"
                             maxLength={5}
                             required
@@ -252,17 +320,36 @@ export default function ClassesIndex({
                     </FormField>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <FormField label="Classroom" error={form.errors.classroom_id}>
-                        <Select value={form.data.classroom_id} onValueChange={(value) => form.setData('classroom_id', value)}>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <FormField
+                        label="Classroom"
+                        error={form.errors.classroom_id}
+                    >
+                        <Select
+                            value={form.data.classroom_id}
+                            onValueChange={(value) =>
+                                form.setData('classroom_id', value)
+                            }
+                        >
                             <SelectTrigger>
                                 <SelectValue placeholder="Select room" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value={NONE}>Not assigned</SelectItem>
+                                <SelectItem value={NONE}>
+                                    Not assigned
+                                </SelectItem>
                                 {classrooms.map((room) => (
-                                    <SelectItem key={room.id} value={String(room.id)} disabled={takenClassroomIds.has(room.id)}>
-                                        {room.name} · {room.capacity} seats{takenClassroomIds.has(room.id) ? ' (in use)' : ''}
+                                    <SelectItem
+                                        key={room.id}
+                                        value={String(room.id)}
+                                        disabled={takenClassroomIds.has(
+                                            room.id,
+                                        )}
+                                    >
+                                        {room.name} · {room.capacity} seats
+                                        {takenClassroomIds.has(room.id)
+                                            ? ' (in use)'
+                                            : ''}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -271,21 +358,37 @@ export default function ClassesIndex({
                     <FormField
                         label="Students"
                         error={form.errors.capacity}
-                        hint={overCapacity ? `More than the ${selectedRoom?.capacity} seats in ${selectedRoom?.name}.` : undefined}
+                        hint={
+                            overCapacity
+                                ? `More than the ${selectedRoom?.capacity} seats in ${selectedRoom?.name}.`
+                                : undefined
+                        }
                     >
                         <Input
                             type="number"
                             min={1}
                             value={form.data.capacity}
-                            onChange={(e) => form.setData('capacity', e.target.value)}
+                            onChange={(e) =>
+                                form.setData('capacity', e.target.value)
+                            }
                             placeholder="e.g. 35"
-                            className={overCapacity ? 'border-amber-500' : undefined}
+                            className={
+                                overCapacity ? 'border-amber-500' : undefined
+                            }
                         />
                     </FormField>
                 </div>
 
-                <FormField label="Class teacher" error={form.errors.class_teacher_id}>
-                    <Select value={form.data.class_teacher_id} onValueChange={(value) => form.setData('class_teacher_id', value)}>
+                <FormField
+                    label="Class teacher"
+                    error={form.errors.class_teacher_id}
+                >
+                    <Select
+                        value={form.data.class_teacher_id}
+                        onValueChange={(value) =>
+                            form.setData('class_teacher_id', value)
+                        }
+                    >
                         <SelectTrigger>
                             <SelectValue placeholder="None" />
                         </SelectTrigger>
@@ -303,10 +406,13 @@ export default function ClassesIndex({
                 {form.data.class_teacher_id !== NONE && (
                     <div className="flex items-center justify-between gap-4 rounded-lg border p-3">
                         <span>
-                            <span className="block text-sm font-medium">Class teacher takes the first period</span>
+                            <span className="block text-sm font-medium">
+                                Class teacher takes the first period
+                            </span>
                             <span className="block text-xs text-muted-foreground">
-                                Every school day starts with the class teacher's own subject for this class. Turn off to schedule the first
-                                period like any other.
+                                Every school day starts with the class teacher's
+                                own subject for this class. Turn off to schedule
+                                the first period like any other.
                             </span>
                         </span>
                         <button
@@ -314,16 +420,25 @@ export default function ClassesIndex({
                             role="switch"
                             aria-checked={form.data.class_teacher_first_period}
                             aria-label="Class teacher takes the first period"
-                            onClick={() => form.setData('class_teacher_first_period', !form.data.class_teacher_first_period)}
+                            onClick={() =>
+                                form.setData(
+                                    'class_teacher_first_period',
+                                    !form.data.class_teacher_first_period,
+                                )
+                            }
                             className={
                                 'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none ' +
-                                (form.data.class_teacher_first_period ? 'bg-primary' : 'bg-input')
+                                (form.data.class_teacher_first_period
+                                    ? 'bg-primary'
+                                    : 'bg-input')
                             }
                         >
                             <span
                                 className={
                                     'inline-block size-5 rounded-full bg-white shadow transition-transform ' +
-                                    (form.data.class_teacher_first_period ? 'translate-x-5.5' : 'translate-x-0.5')
+                                    (form.data.class_teacher_first_period
+                                        ? 'translate-x-5.5'
+                                        : 'translate-x-0.5')
                                 }
                             />
                         </button>
@@ -332,13 +447,23 @@ export default function ClassesIndex({
 
                 {editing && (
                     <FormField label="Status" error={form.errors.status}>
-                        <Select value={form.data.status} onValueChange={(value) => form.setData('status', value as SchoolClass['status'])}>
+                        <Select
+                            value={form.data.status}
+                            onValueChange={(value) =>
+                                form.setData(
+                                    'status',
+                                    value as SchoolClass['status'],
+                                )
+                            }
+                        >
                             <SelectTrigger>
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="active">Active</SelectItem>
-                                <SelectItem value="inactive">Inactive</SelectItem>
+                                <SelectItem value="inactive">
+                                    Inactive
+                                </SelectItem>
                             </SelectContent>
                         </Select>
                     </FormField>
@@ -350,7 +475,13 @@ export default function ClassesIndex({
                 onOpenChange={(open) => !open && setDeleting(null)}
                 title="Delete Class"
                 message={`Delete class ${deleting ? className(deleting) : ''}? Its timetable will no longer be shown.`}
-                onConfirm={() => deleting && router.delete(SchoolClassController.destroy.url(deleting.id), { preserveScroll: true })}
+                onConfirm={() =>
+                    deleting &&
+                    router.delete(
+                        SchoolClassController.destroy.url(deleting.id),
+                        { preserveScroll: true },
+                    )
+                }
             />
         </div>
     );

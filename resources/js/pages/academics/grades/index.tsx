@@ -15,12 +15,20 @@ import {
     StatusBadge,
 } from '@/components/data-page';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import type { BreadcrumbItem } from '@/types';
 import type { Grade } from '@/types/timetable';
 import { index as gradesIndex } from '@/routes/grades';
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Grades', href: gradesIndex() }];
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Grades', href: gradesIndex() },
+];
 
 type GradeForm = { name: string; level_order: string; status: Grade['status'] };
 
@@ -29,9 +37,15 @@ export default function GradesIndex({ grades }: { grades: Grade[] }) {
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing] = useState<Grade | null>(null);
     const [deleting, setDeleting] = useState<Grade | null>(null);
-    const form = useForm<GradeForm>({ name: '', level_order: '', status: 'active' });
+    const form = useForm<GradeForm>({
+        name: '',
+        level_order: '',
+        status: 'active',
+    });
 
-    const rows = grades.filter((grade) => matchesSearch(search, grade.name, `grade ${grade.name}`));
+    const rows = grades.filter((grade) =>
+        matchesSearch(search, grade.name, `grade ${grade.name}`),
+    );
 
     function openCreate() {
         setEditing(null);
@@ -43,12 +57,19 @@ export default function GradesIndex({ grades }: { grades: Grade[] }) {
     function openEdit(grade: Grade) {
         setEditing(grade);
         form.clearErrors();
-        form.setData({ name: grade.name, level_order: String(grade.level_order), status: grade.status });
+        form.setData({
+            name: grade.name,
+            level_order: String(grade.level_order),
+            status: grade.status,
+        });
         setModalOpen(true);
     }
 
     function submit() {
-        const options = { preserveScroll: true, onSuccess: () => setModalOpen(false) };
+        const options = {
+            preserveScroll: true,
+            onSuccess: () => setModalOpen(false),
+        };
 
         if (editing) {
             form.put(GradeController.update.url(editing.id), options);
@@ -68,7 +89,11 @@ export default function GradesIndex({ grades }: { grades: Grade[] }) {
                 createLabel="New Grade"
                 onCreate={openCreate}
             />
-            <SearchBar value={search} onChange={setSearch} placeholder="Search grades..." />
+            <SearchBar
+                value={search}
+                onChange={setSearch}
+                placeholder="Search grades..."
+            />
 
             <DataTable
                 head={
@@ -90,7 +115,10 @@ export default function GradesIndex({ grades }: { grades: Grade[] }) {
                             <StatusBadge status={grade.status} />
                         </td>
                         <td className="text-right">
-                            <RowActions onEdit={() => openEdit(grade)} onDelete={() => setDeleting(grade)} />
+                            <RowActions
+                                onEdit={() => openEdit(grade)}
+                                onDelete={() => setDeleting(grade)}
+                            />
                         </td>
                     </tr>
                 ))}
@@ -124,24 +152,37 @@ export default function GradesIndex({ grades }: { grades: Grade[] }) {
                         required
                     />
                 </FormField>
-                <FormField label="Sort order" error={form.errors.level_order} hint="Leave empty to sort by the grade number.">
+                <FormField
+                    label="Sort order"
+                    error={form.errors.level_order}
+                    hint="Leave empty to sort by the grade number."
+                >
                     <Input
                         type="number"
                         value={form.data.level_order}
-                        onChange={(e) => form.setData('level_order', e.target.value)}
+                        onChange={(e) =>
+                            form.setData('level_order', e.target.value)
+                        }
                         placeholder="e.g. 1"
                         required={Boolean(editing)}
                     />
                 </FormField>
                 {editing && (
                     <FormField label="Status" error={form.errors.status}>
-                        <Select value={form.data.status} onValueChange={(value) => form.setData('status', value as Grade['status'])}>
+                        <Select
+                            value={form.data.status}
+                            onValueChange={(value) =>
+                                form.setData('status', value as Grade['status'])
+                            }
+                        >
                             <SelectTrigger>
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="active">Active</SelectItem>
-                                <SelectItem value="inactive">Inactive</SelectItem>
+                                <SelectItem value="inactive">
+                                    Inactive
+                                </SelectItem>
                             </SelectContent>
                         </Select>
                     </FormField>
@@ -153,7 +194,12 @@ export default function GradesIndex({ grades }: { grades: Grade[] }) {
                 onOpenChange={(open) => !open && setDeleting(null)}
                 title="Delete Grade"
                 message={`Delete Grade ${deleting?.name}? Its classes must be moved or removed first.`}
-                onConfirm={() => deleting && router.delete(GradeController.destroy.url(deleting.id), { preserveScroll: true })}
+                onConfirm={() =>
+                    deleting &&
+                    router.delete(GradeController.destroy.url(deleting.id), {
+                        preserveScroll: true,
+                    })
+                }
             />
         </div>
     );

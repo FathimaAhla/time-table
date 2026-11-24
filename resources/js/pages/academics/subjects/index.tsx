@@ -15,12 +15,20 @@ import {
     StatusBadge,
 } from '@/components/data-page';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import type { BreadcrumbItem } from '@/types';
 import type { Subject } from '@/types/timetable';
 import { index as subjectsIndex } from '@/routes/subjects';
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Subjects', href: subjectsIndex() }];
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Subjects', href: subjectsIndex() },
+];
 
 type SubjectForm = {
     name: string;
@@ -30,7 +38,13 @@ type SubjectForm = {
     status: Subject['status'];
 };
 
-const emptyForm: SubjectForm = { name: '', code: '', type: 'core', color_hex: '#6366f1', status: 'active' };
+const emptyForm: SubjectForm = {
+    name: '',
+    code: '',
+    type: 'core',
+    color_hex: '#6366f1',
+    status: 'active',
+};
 
 export default function SubjectsIndex({ subjects }: { subjects: Subject[] }) {
     const [search, setSearch] = useState('');
@@ -39,7 +53,9 @@ export default function SubjectsIndex({ subjects }: { subjects: Subject[] }) {
     const [deleting, setDeleting] = useState<Subject | null>(null);
     const form = useForm<SubjectForm>(emptyForm);
 
-    const rows = subjects.filter((s) => matchesSearch(search, s.name, s.code, s.type));
+    const rows = subjects.filter((s) =>
+        matchesSearch(search, s.name, s.code, s.type),
+    );
 
     function openCreate() {
         setEditing(null);
@@ -62,7 +78,10 @@ export default function SubjectsIndex({ subjects }: { subjects: Subject[] }) {
     }
 
     function submit() {
-        const options = { preserveScroll: true, onSuccess: () => setModalOpen(false) };
+        const options = {
+            preserveScroll: true,
+            onSuccess: () => setModalOpen(false),
+        };
 
         if (editing) {
             form.put(SubjectController.update.url(editing.id), options);
@@ -82,7 +101,11 @@ export default function SubjectsIndex({ subjects }: { subjects: Subject[] }) {
                 createLabel="New Subject"
                 onCreate={openCreate}
             />
-            <SearchBar value={search} onChange={setSearch} placeholder="Search subjects..." />
+            <SearchBar
+                value={search}
+                onChange={setSearch}
+                placeholder="Search subjects..."
+            />
 
             <DataTable
                 head={
@@ -101,7 +124,14 @@ export default function SubjectsIndex({ subjects }: { subjects: Subject[] }) {
                         <td className="text-muted-foreground">{index + 1}</td>
                         <td>
                             <div className="flex items-center gap-2 font-medium">
-                                <span className="size-2.5 rounded-full" style={{ backgroundColor: s.color_hex ?? 'var(--muted-foreground)' }} />
+                                <span
+                                    className="size-2.5 rounded-full"
+                                    style={{
+                                        backgroundColor:
+                                            s.color_hex ??
+                                            'var(--muted-foreground)',
+                                    }}
+                                />
                                 {s.name}
                             </div>
                         </td>
@@ -111,7 +141,10 @@ export default function SubjectsIndex({ subjects }: { subjects: Subject[] }) {
                             <StatusBadge status={s.status} />
                         </td>
                         <td className="text-right">
-                            <RowActions onEdit={() => openEdit(s)} onDelete={() => setDeleting(s)} />
+                            <RowActions
+                                onEdit={() => openEdit(s)}
+                                onDelete={() => setDeleting(s)}
+                            />
                         </td>
                     </tr>
                 ))}
@@ -136,47 +169,79 @@ export default function SubjectsIndex({ subjects }: { subjects: Subject[] }) {
                 onSubmit={submit}
             >
                 <FormField label="Subject name" error={form.errors.name}>
-                    <Input value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} placeholder="e.g. Mathematics" autoFocus required />
+                    <Input
+                        value={form.data.name}
+                        onChange={(e) => form.setData('name', e.target.value)}
+                        placeholder="e.g. Mathematics"
+                        autoFocus
+                        required
+                    />
                 </FormField>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <FormField label="Code" error={form.errors.code}>
                         <Input
                             value={form.data.code}
-                            onChange={(e) => form.setData('code', e.target.value.toUpperCase())}
+                            onChange={(e) =>
+                                form.setData(
+                                    'code',
+                                    e.target.value.toUpperCase(),
+                                )
+                            }
                             placeholder="e.g. MATH"
                             required
                         />
                     </FormField>
                     <FormField label="Type" error={form.errors.type}>
-                        <Select value={form.data.type} onValueChange={(value) => form.setData('type', value as Subject['type'])}>
+                        <Select
+                            value={form.data.type}
+                            onValueChange={(value) =>
+                                form.setData('type', value as Subject['type'])
+                            }
+                        >
                             <SelectTrigger>
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="core">Core</SelectItem>
-                                <SelectItem value="elective">Elective</SelectItem>
+                                <SelectItem value="elective">
+                                    Elective
+                                </SelectItem>
                             </SelectContent>
                         </Select>
                     </FormField>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <FormField label="Colour" error={form.errors.color_hex}>
                         <Input
                             type="color"
                             value={form.data.color_hex}
-                            onChange={(e) => form.setData('color_hex', e.target.value)}
+                            onChange={(e) =>
+                                form.setData('color_hex', e.target.value)
+                            }
                             className="h-9 p-1"
                         />
                     </FormField>
                     {editing && (
                         <FormField label="Status" error={form.errors.status}>
-                            <Select value={form.data.status} onValueChange={(value) => form.setData('status', value as Subject['status'])}>
+                            <Select
+                                value={form.data.status}
+                                onValueChange={(value) =>
+                                    form.setData(
+                                        'status',
+                                        value as Subject['status'],
+                                    )
+                                }
+                            >
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="active">Active</SelectItem>
-                                    <SelectItem value="inactive">Inactive</SelectItem>
+                                    <SelectItem value="active">
+                                        Active
+                                    </SelectItem>
+                                    <SelectItem value="inactive">
+                                        Inactive
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
                         </FormField>
@@ -189,7 +254,12 @@ export default function SubjectsIndex({ subjects }: { subjects: Subject[] }) {
                 onOpenChange={(open) => !open && setDeleting(null)}
                 title="Delete Subject"
                 message={`Delete ${deleting?.name}? Teacher assignments for it will stop being scheduled.`}
-                onConfirm={() => deleting && router.delete(SubjectController.destroy.url(deleting.id), { preserveScroll: true })}
+                onConfirm={() =>
+                    deleting &&
+                    router.delete(SubjectController.destroy.url(deleting.id), {
+                        preserveScroll: true,
+                    })
+                }
             />
         </div>
     );

@@ -14,10 +14,27 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import type { BreadcrumbItem } from '@/types';
-import type { Grade, SchoolClass, Subject, Teacher, Term, TimeSlot, Timetable, TimetableSession, WeekDay } from '@/types/timetable';
-import { index as timetableIndex, classMethod as classView, teacher as teacherView, teachers as allTeachers } from '@/routes/timetable';
+import type {
+    Grade,
+    SchoolClass,
+    Subject,
+    Teacher,
+    Term,
+    TimeSlot,
+    Timetable,
+    TimetableSession,
+    WeekDay,
+} from '@/types/timetable';
+import {
+    index as timetableIndex,
+    classMethod as classView,
+    teacher as teacherView,
+    teachers as allTeachers,
+} from '@/routes/timetable';
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Master Timetable', href: timetableIndex() }];
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Master Timetable', href: timetableIndex() },
+];
 
 type ClassWithTimetable = SchoolClass & { timetables: Timetable[] };
 
@@ -45,7 +62,11 @@ export default function MasterTimetable({
     const { currentInstitute, canManage } = usePage().props;
 
     function setFilter(key: string, value: string) {
-        router.get(timetableIndex().url, { ...filters, [key]: value === 'all' ? undefined : value }, { preserveState: true });
+        router.get(
+            timetableIndex().url,
+            { ...filters, [key]: value === 'all' ? undefined : value },
+            { preserveState: true },
+        );
     }
 
     function generateAll() {
@@ -69,10 +90,16 @@ export default function MasterTimetable({
             <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                     <h1 className="text-xl font-semibold">Master Timetable</h1>
-                    <p className="text-sm text-muted-foreground">{term ? term.name : 'No current term configured'} — all classes</p>
+                    <p className="text-sm text-muted-foreground">
+                        {term ? term.name : 'No current term configured'} — all
+                        classes
+                    </p>
                 </div>
                 <div className="flex w-full flex-wrap gap-2 sm:w-auto">
-                    <Select value="" onValueChange={(value) => router.visit(value)}>
+                    <Select
+                        value=""
+                        onValueChange={(value) => router.visit(value)}
+                    >
                         <SelectTrigger className="w-full sm:w-56">
                             <SelectValue placeholder="Open a class or teacher..." />
                         </SelectTrigger>
@@ -80,15 +107,22 @@ export default function MasterTimetable({
                             <SelectGroup>
                                 <SelectLabel>Classes</SelectLabel>
                                 {classes.map((c) => (
-                                    <SelectItem key={`c${c.id}`} value={classView(c.id).url}>
-                                        Class {c.grade?.name}{c.name}
+                                    <SelectItem
+                                        key={`c${c.id}`}
+                                        value={classView(c.id).url}
+                                    >
+                                        Class {c.grade?.name}
+                                        {c.name}
                                     </SelectItem>
                                 ))}
                             </SelectGroup>
                             <SelectGroup>
                                 <SelectLabel>Teachers</SelectLabel>
                                 {teachers.map((t) => (
-                                    <SelectItem key={`t${t.id}`} value={teacherView(t.id).url}>
+                                    <SelectItem
+                                        key={`t${t.id}`}
+                                        value={teacherView(t.id).url}
+                                    >
                                         {t.full_name}
                                     </SelectItem>
                                 ))}
@@ -101,13 +135,23 @@ export default function MasterTimetable({
                             All teacher timetables
                         </Link>
                     </Button>
-                    {canManage && <Button onClick={generateAll}>Generate all classes</Button>}
-                    <ExportMenu elementId="master-timetable-grid" filename="master-timetable" />
+                    {canManage && (
+                        <Button onClick={generateAll}>
+                            Generate all classes
+                        </Button>
+                    )}
+                    <ExportMenu
+                        elementId="master-timetable-grid"
+                        filename="master-timetable"
+                    />
                 </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 rounded-lg border p-3 sm:flex sm:flex-wrap">
-                <Select value={filters.grade_id ?? 'all'} onValueChange={(v) => setFilter('grade_id', v)}>
+                <Select
+                    value={filters.grade_id ?? 'all'}
+                    onValueChange={(v) => setFilter('grade_id', v)}
+                >
                     <SelectTrigger className="w-full sm:w-40">
                         <SelectValue placeholder="All grades" />
                     </SelectTrigger>
@@ -121,7 +165,10 @@ export default function MasterTimetable({
                     </SelectContent>
                 </Select>
 
-                <Select value={filters.school_class_id ?? 'all'} onValueChange={(v) => setFilter('school_class_id', v)}>
+                <Select
+                    value={filters.school_class_id ?? 'all'}
+                    onValueChange={(v) => setFilter('school_class_id', v)}
+                >
                     <SelectTrigger className="w-full sm:w-44">
                         <SelectValue placeholder="All classes" />
                     </SelectTrigger>
@@ -129,13 +176,17 @@ export default function MasterTimetable({
                         <SelectItem value="all">All classes</SelectItem>
                         {classes.map((c) => (
                             <SelectItem key={c.id} value={String(c.id)}>
-                                {c.grade?.name}{c.name}
+                                {c.grade?.name}
+                                {c.name}
                             </SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
 
-                <Select value={filters.teacher_id ?? 'all'} onValueChange={(v) => setFilter('teacher_id', v)}>
+                <Select
+                    value={filters.teacher_id ?? 'all'}
+                    onValueChange={(v) => setFilter('teacher_id', v)}
+                >
                     <SelectTrigger className="w-full sm:w-48">
                         <SelectValue placeholder="All teachers" />
                     </SelectTrigger>
@@ -149,7 +200,10 @@ export default function MasterTimetable({
                     </SelectContent>
                 </Select>
 
-                <Select value={filters.subject_id ?? 'all'} onValueChange={(v) => setFilter('subject_id', v)}>
+                <Select
+                    value={filters.subject_id ?? 'all'}
+                    onValueChange={(v) => setFilter('subject_id', v)}
+                >
                     <SelectTrigger className="w-full sm:w-40">
                         <SelectValue placeholder="All subjects" />
                     </SelectTrigger>
@@ -167,20 +221,29 @@ export default function MasterTimetable({
             <div id="master-timetable-grid" className="flex flex-col gap-8">
                 {currentInstitute && (
                     <div className="text-center">
-                        <div className="text-lg font-bold">{currentInstitute.name}</div>
-                        <div className="text-xs uppercase tracking-wide text-muted-foreground">Master Timetable</div>
+                        <div className="text-lg font-bold">
+                            {currentInstitute.name}
+                        </div>
+                        <div className="text-xs tracking-wide text-muted-foreground uppercase">
+                            Master Timetable
+                        </div>
                     </div>
                 )}
                 {classes.map((c) => {
                     const timetable = c.timetables?.[0];
-                    const classSessions = timetable ? sessionsByTimetable.get(timetable.id) ?? [] : [];
+                    const classSessions = timetable
+                        ? (sessionsByTimetable.get(timetable.id) ?? [])
+                        : [];
 
                     return (
                         <div key={c.id} className="rounded-lg border p-3">
                             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                                 <h2 className="font-semibold">
-                                    {currentInstitute ? `${currentInstitute.name} — ` : ''}
-                                    {c.grade?.name}{c.name}
+                                    {currentInstitute
+                                        ? `${currentInstitute.name} — `
+                                        : ''}
+                                    {c.grade?.name}
+                                    {c.name}
                                 </h2>
                                 <div className="flex items-center gap-2">
                                     {timetable?.is_out_of_sync && (
@@ -188,7 +251,10 @@ export default function MasterTimetable({
                                             Out of sync
                                         </span>
                                     )}
-                                    <a href={classView(c.id).url} className="text-xs text-primary underline">
+                                    <a
+                                        href={classView(c.id).url}
+                                        className="text-xs text-primary underline"
+                                    >
                                         Open / edit
                                     </a>
                                 </div>
@@ -197,9 +263,14 @@ export default function MasterTimetable({
                                 <table className="w-full border-collapse text-xs">
                                     <thead>
                                         <tr>
-                                            <th className="sticky left-0 w-20 border bg-muted p-1.5 text-left sm:w-28">Time</th>
+                                            <th className="sticky left-0 w-20 border bg-muted p-1.5 text-left sm:w-28">
+                                                Time
+                                            </th>
                                             {weekDays.map((d) => (
-                                                <th key={d.id} className="min-w-24 border bg-muted/50 p-1.5 text-left sm:min-w-0">
+                                                <th
+                                                    key={d.id}
+                                                    className="min-w-24 border bg-muted/50 p-1.5 text-left sm:min-w-0"
+                                                >
                                                     {d.short_code}
                                                 </th>
                                             ))}
@@ -208,28 +279,64 @@ export default function MasterTimetable({
                                     <tbody>
                                         {timeSlots.map((slot) => (
                                             <tr key={slot.id}>
-                                                <td className="sticky left-0 border bg-background p-1.5 font-mono whitespace-nowrap">{slot.start_time.slice(0, 5)}<span className="hidden sm:inline">-</span><br className="sm:hidden" />{slot.end_time.slice(0, 5)}</td>
+                                                <td className="sticky left-0 border bg-background p-1.5 font-mono whitespace-nowrap">
+                                                    {slot.start_time.slice(
+                                                        0,
+                                                        5,
+                                                    )}
+                                                    <span className="hidden sm:inline">
+                                                        -
+                                                    </span>
+                                                    <br className="sm:hidden" />
+                                                    {slot.end_time.slice(0, 5)}
+                                                </td>
                                                 {slot.slot_type === 'fixed' ? (
                                                     <td
-                                                        colSpan={weekDays.length}
+                                                        colSpan={
+                                                            weekDays.length
+                                                        }
                                                         className="border bg-orange-50 p-1.5 text-left text-orange-800 sm:text-center dark:bg-orange-900/20 dark:text-orange-300"
                                                     >
-                                                        {slot.fixed_activity_name}
+                                                        {
+                                                            slot.fixed_activity_name
+                                                        }
                                                     </td>
                                                 ) : (
                                                     weekDays.map((day) => {
-                                                        const session = classSessions.find(
-                                                            (s) => s.week_day_id === day.id && s.time_slot_id === slot.id,
-                                                        );
+                                                        const session =
+                                                            classSessions.find(
+                                                                (s) =>
+                                                                    s.week_day_id ===
+                                                                        day.id &&
+                                                                    s.time_slot_id ===
+                                                                        slot.id,
+                                                            );
                                                         return (
-                                                            <td key={day.id} className="border p-1.5">
+                                                            <td
+                                                                key={day.id}
+                                                                className="border p-1.5"
+                                                            >
                                                                 {session ? (
                                                                     <div>
-                                                                        <div className="font-medium">{session.subject?.name}</div>
-                                                                        <div className="text-muted-foreground">{session.teacher?.full_name}</div>
+                                                                        <div className="font-medium">
+                                                                            {
+                                                                                session
+                                                                                    .subject
+                                                                                    ?.name
+                                                                            }
+                                                                        </div>
+                                                                        <div className="text-muted-foreground">
+                                                                            {
+                                                                                session
+                                                                                    .teacher
+                                                                                    ?.full_name
+                                                                            }
+                                                                        </div>
                                                                     </div>
                                                                 ) : (
-                                                                    <span className="text-muted-foreground">—</span>
+                                                                    <span className="text-muted-foreground">
+                                                                        —
+                                                                    </span>
                                                                 )}
                                                             </td>
                                                         );
@@ -243,7 +350,11 @@ export default function MasterTimetable({
                         </div>
                     );
                 })}
-                {classes.length === 0 && <p className="text-muted-foreground">No classes match the current filters.</p>}
+                {classes.length === 0 && (
+                    <p className="text-muted-foreground">
+                        No classes match the current filters.
+                    </p>
+                )}
             </div>
         </div>
     );

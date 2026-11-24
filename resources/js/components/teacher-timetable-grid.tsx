@@ -1,3 +1,4 @@
+import { useColorful } from '@/hooks/use-colorful';
 import { subjectColor, tint } from '@/lib/subject-color';
 import type {
     Teacher,
@@ -28,6 +29,8 @@ export function TeacherTimetableGrid({
     timeSlots: TimeSlot[];
     sessions: TimetableSession[];
 }) {
+    const [colorful] = useColorful();
+
     const sessionAt = (dayId: number, slotId: number) =>
         sessions.find(
             (s) => s.week_day_id === dayId && s.time_slot_id === slotId,
@@ -113,20 +116,24 @@ export function TeacherTimetableGrid({
                                             >
                                                 {session ? (
                                                     <div
-                                                        className="flex min-h-12 flex-col justify-center rounded-md border-l-4 p-2 text-xs"
-                                                        style={{
-                                                            backgroundColor:
-                                                                tint(
-                                                                    subjectColor(
-                                                                        session.subject,
-                                                                    ),
-                                                                    0.14,
-                                                                ),
-                                                            borderLeftColor:
-                                                                subjectColor(
-                                                                    session.subject,
-                                                                ),
-                                                        }}
+                                                        className={`flex min-h-12 flex-col justify-center rounded-md p-2 text-xs ${colorful ? 'border-l-4' : 'border'}`}
+                                                        style={
+                                                            colorful
+                                                                ? {
+                                                                      backgroundColor:
+                                                                          tint(
+                                                                              subjectColor(
+                                                                                  session.subject,
+                                                                              ),
+                                                                              0.14,
+                                                                          ),
+                                                                      borderLeftColor:
+                                                                          subjectColor(
+                                                                              session.subject,
+                                                                          ),
+                                                                  }
+                                                                : undefined
+                                                        }
                                                     >
                                                         <span className="font-semibold">
                                                             {schoolClass

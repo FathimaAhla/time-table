@@ -2,7 +2,9 @@ import { Head, router, usePage } from '@inertiajs/react';
 import { AlertTriangle, Lock, Unlock } from 'lucide-react';
 import { useState } from 'react';
 import TimetableController from '@/actions/App/Http/Controllers/TimetableController';
+import { ColorfulToggle } from '@/components/colorful-toggle';
 import { ExportMenu } from '@/components/export-menu';
+import { useColorful } from '@/hooks/use-colorful';
 import { Button } from '@/components/ui/button';
 import { subjectColor, tint } from '@/lib/subject-color';
 import type { BreadcrumbItem } from '@/types';
@@ -39,6 +41,7 @@ export default function ClassView({
     pendingAssignments: TeacherAssignment[];
 }) {
     const [dragSessionId, setDragSessionId] = useState<number | null>(null);
+    const [colorful] = useColorful();
     const { currentInstitute, canManage } = usePage().props;
 
     function sessionAt(dayId: number, slotId: number) {
@@ -133,6 +136,7 @@ export default function ClassView({
                             Full re-generate
                         </Button>
                     )}
+                    <ColorfulToggle />
                     <ExportMenu
                         elementId="class-timetable-grid"
                         filename={`${schoolClass.grade?.name}-${schoolClass.name}-timetable`}
@@ -265,14 +269,15 @@ export default function ClassView({
                                                             'group relative flex min-h-14 flex-col justify-center rounded-md p-2 text-xs ' +
                                                             (session.is_locked
                                                                 ? 'cursor-not-allowed border border-dashed bg-neutral-100 dark:bg-neutral-800'
-                                                                : 'cursor-pointer border border-l-4 hover:shadow-md sm:cursor-grab') +
+                                                                : `cursor-pointer border hover:shadow-md sm:cursor-grab ${colorful ? 'border-l-4' : ''}`) +
                                                             (dragSessionId ===
                                                             session.id
                                                                 ? ' ring-2 ring-primary'
                                                                 : '')
                                                         }
                                                         style={
-                                                            session.is_locked
+                                                            session.is_locked ||
+                                                            !colorful
                                                                 ? undefined
                                                                 : {
                                                                       backgroundColor:

@@ -13,10 +13,12 @@ import {
     HeartHandshake,
     Lock,
     Megaphone,
+    Monitor,
     MousePointerClick,
     ShieldCheck,
     Smartphone,
     Sparkles,
+    Tablet,
     UserX,
     Users,
     Wand2,
@@ -28,6 +30,11 @@ import type {
     PointerEvent as ReactPointerEvent,
     ReactNode,
 } from 'react';
+import {
+    DesktopDevice,
+    PhoneDevice,
+    TabletDevice,
+} from '@/components/welcome/device-showcase';
 import { dashboard, login, register } from '@/routes';
 
 /* ------------------------------------------------------------------ */
@@ -133,23 +140,55 @@ const faqs = [
     },
 ];
 
-const previewDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-const subjectColors: Record<string, string> = {
-    Maths: 'bg-indigo-500',
-    Science: 'bg-emerald-500',
-    English: 'bg-sky-500',
-    History: 'bg-amber-500',
-    Art: 'bg-pink-500',
-    ICT: 'bg-violet-500',
-    PE: 'bg-red-500',
-};
-const previewGrid: (string[] | null)[] = [
-    ['Maths', 'Science', 'English', 'History', 'Art'],
-    ['Science', 'Maths', 'ICT', 'English', 'Maths'],
-    ['English', 'History', 'Maths', 'Science', 'PE'],
-    null,
-    ['ICT', 'English', 'Science', 'Maths', 'History'],
-    ['Art', 'PE', 'History', 'ICT', 'Science'],
+const heroChips = [
+    {
+        label: 'Maths',
+        color: '#6366f1',
+        position: 'top-32 left-[6%]',
+        depth: -35,
+        rotate: -8,
+        delay: 0,
+    },
+    {
+        label: 'Science',
+        color: '#10b981',
+        position: 'top-64 left-[12%]',
+        depth: 25,
+        rotate: 6,
+        delay: 1.2,
+    },
+    {
+        label: 'English',
+        color: '#0ea5e9',
+        position: 'top-28 right-[8%]',
+        depth: 40,
+        rotate: 7,
+        delay: 0.6,
+    },
+    {
+        label: 'History',
+        color: '#f59e0b',
+        position: 'top-72 right-[14%]',
+        depth: -25,
+        rotate: -5,
+        delay: 1.8,
+    },
+    {
+        label: 'Art',
+        color: '#ec4899',
+        position: 'top-[26rem] left-[4%]',
+        depth: 45,
+        rotate: 10,
+        delay: 2.4,
+    },
+    {
+        label: 'ICT',
+        color: '#8b5cf6',
+        position: 'top-[25rem] right-[5%]',
+        depth: -40,
+        rotate: -10,
+        delay: 0.9,
+    },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -253,8 +292,7 @@ function SpotlightCard({
             <div
                 className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
                 style={{
-                    background:
-                        'radial-gradient(280px circle at var(--x) var(--y), rgba(99,102,241,0.15), transparent 70%)',
+                    background: 'rgba(99,102,241,0.05)',
                 }}
             />
             <div className={`relative ${className}`}>{children}</div>
@@ -342,24 +380,6 @@ export default function Welcome() {
         });
     };
 
-    const primaryCta = auth.user ? (
-        <Link
-            href={dashboard()}
-            className="group inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 font-semibold text-white shadow-lg shadow-indigo-600/30 transition hover:-translate-y-0.5 hover:bg-indigo-700 hover:shadow-xl"
-        >
-            Go to dashboard
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-        </Link>
-    ) : (
-        <Link
-            href={register()}
-            className="group inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 font-semibold text-white shadow-lg shadow-indigo-600/30 transition hover:-translate-y-0.5 hover:bg-indigo-700 hover:shadow-xl"
-        >
-            Create free school account
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-        </Link>
-    );
-
     const layer = (depth: number): CSSProperties => ({
         transform: `translate3d(${tilt.x * depth}px, ${tilt.y * depth}px, 0)`,
         transition: 'transform 200ms ease-out',
@@ -377,20 +397,22 @@ export default function Welcome() {
             <div className="min-h-screen overflow-x-hidden bg-background text-foreground">
                 {/* Scroll progress bar */}
                 <div
-                    className="fixed inset-x-0 top-0 z-30 h-0.5 origin-left bg-gradient-to-r from-indigo-600 to-sky-500"
+                    className="fixed inset-x-0 top-0 z-30 h-0.5 origin-left bg-indigo-600"
                     style={{ transform: `scaleX(${scrollProgress})` }}
                 />
 
                 <header
-                    className={`sticky top-0 z-20 border-b transition-all duration-300 ${scrolled ? 'bg-background/80 shadow-sm backdrop-blur' : 'border-transparent bg-transparent'}`}
+                    className={`sticky top-0 z-20 border-b transition-all duration-300 ${scrolled ? 'bg-background/85 text-foreground shadow-sm backdrop-blur' : 'border-transparent bg-transparent text-white'}`}
                 >
-                    <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+                    <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
                         <span className="flex items-center gap-2 font-semibold">
-                            <span className="rounded-lg bg-indigo-600 p-1.5 text-white">
+                            <span
+                                className={`rounded-lg p-1.5 ${scrolled ? 'bg-indigo-600 text-white' : 'bg-white text-indigo-700'}`}
+                            >
                                 <CalendarDays className="size-4" />
                             </span>
                             School Timetable
-                            <span className="hidden rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold tracking-wide text-green-700 uppercase sm:inline dark:bg-green-900/40 dark:text-green-300">
+                            <span className="hidden rounded-full bg-green-400 px-2 py-0.5 text-[10px] font-bold tracking-wide text-green-950 uppercase sm:inline">
                                 Free
                             </span>
                         </span>
@@ -398,7 +420,7 @@ export default function Welcome() {
                             {auth.user ? (
                                 <Link
                                     href={dashboard()}
-                                    className="rounded-md bg-indigo-600 px-4 py-1.5 font-medium text-white hover:bg-indigo-700"
+                                    className={`rounded-md px-4 py-1.5 font-medium ${scrolled ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-white text-indigo-700 hover:bg-indigo-50'}`}
                                 >
                                     Dashboard
                                 </Link>
@@ -406,13 +428,13 @@ export default function Welcome() {
                                 <>
                                     <Link
                                         href={login()}
-                                        className="rounded-md px-3 py-1.5 hover:bg-muted"
+                                        className={`rounded-md px-3 py-1.5 ${scrolled ? 'hover:bg-muted' : 'hover:bg-white/15'}`}
                                     >
                                         Log in
                                     </Link>
                                     <Link
                                         href={register()}
-                                        className="rounded-md bg-indigo-600 px-4 py-1.5 font-medium text-white hover:bg-indigo-700"
+                                        className={`rounded-md px-4 py-1.5 font-medium ${scrolled ? 'bg-indigo-600 text-white hover:bg-indigo-700' : 'bg-white text-indigo-700 hover:bg-indigo-50'}`}
                                     >
                                         Start free
                                     </Link>
@@ -422,160 +444,220 @@ export default function Welcome() {
                     </div>
                 </header>
 
-                {/* ---------------- Hero ---------------- */}
+                {/* ---------------- Hero banner (full width, colourful) ---------------- */}
                 <section
                     onPointerMove={onHeroMove}
                     onPointerLeave={() => setTilt({ x: 0, y: 0 })}
-                    className="relative -mt-14 pt-14"
+                    className="relative -mt-14 overflow-hidden bg-indigo-700 pt-14 pb-44 text-white sm:pb-60 lg:pb-80"
                 >
-                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(99,102,241,0.18),transparent_60%)]" />
-                    <div
-                        className="pointer-events-none absolute -top-10 -left-20 size-72 rounded-full bg-indigo-400/20 blur-3xl"
-                        style={layer(-40)}
-                    />
-                    <div
-                        className="pointer-events-none absolute top-40 -right-10 size-80 rounded-full bg-sky-400/20 blur-3xl"
-                        style={layer(50)}
-                    />
+                    {/* Floating subject chips in the timetable colours */}
+                    {heroChips.map((chip) => (
+                        <div
+                            key={chip.label}
+                            className={`pointer-events-none absolute hidden md:block ${chip.position}`}
+                            style={layer(chip.depth)}
+                        >
+                            <span
+                                className="inline-block animate-float rounded-lg px-3 py-1.5 text-xs font-semibold text-white shadow-lg ring-1 ring-white/30"
+                                style={{
+                                    backgroundColor: chip.color,
+                                    rotate: `${chip.rotate}deg`,
+                                    animationDelay: `${chip.delay}s`,
+                                }}
+                            >
+                                {chip.label}
+                            </span>
+                        </div>
+                    ))}
 
-                    <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 py-16 lg:grid-cols-2 lg:py-24">
-                        <div>
-                            <Reveal>
-                                <span className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-3 py-1 text-xs font-semibold text-green-700 dark:border-green-900 dark:bg-green-950 dark:text-green-300">
-                                    <Gift className="size-3.5" /> 100% free for
-                                    schools · No credit card · No hidden fees
+                    <div className="relative mx-auto max-w-4xl px-4 pt-14 text-center sm:pt-20">
+                        <Reveal>
+                            <span className="mb-6 inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-white/15 px-4 py-1.5 text-xs font-semibold backdrop-blur sm:text-sm">
+                                <Gift className="size-4 text-amber-300" /> 100%
+                                free for schools · No credit card · No hidden
+                                fees
+                            </span>
+                        </Reveal>
+                        <Reveal delay={100}>
+                            <h1 className="text-4xl font-extrabold tracking-tight sm:text-6xl lg:text-7xl">
+                                Stop spending your holidays on the{' '}
+                                <span className="text-amber-300">
+                                    timetable
                                 </span>
-                            </Reveal>
-                            <Reveal delay={100}>
-                                <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-                                    Stop spending your holidays on the{' '}
-                                    <span className="animate-gradient bg-gradient-to-r from-indigo-600 via-sky-500 to-indigo-600 bg-[length:200%_auto] bg-clip-text text-transparent">
-                                        timetable
-                                    </span>
-                                    .
-                                </h1>
-                            </Reveal>
-                            <Reveal delay={200}>
-                                <p className="mt-5 max-w-xl text-lg text-muted-foreground">
-                                    Free timetable software for principals. Add
-                                    your teachers and subjects, click{' '}
-                                    <strong>Generate</strong>, and print a
-                                    clash-free timetable for every class in
-                                    minutes.
-                                </p>
-                            </Reveal>
-                            <Reveal delay={300}>
-                                <div className="mt-8 flex flex-wrap items-center gap-3">
-                                    {primaryCta}
-                                    <a
-                                        href="#how-it-works"
-                                        className="inline-flex items-center gap-1.5 rounded-lg border px-5 py-3 font-medium transition hover:bg-muted"
+                                .
+                            </h1>
+                        </Reveal>
+                        <Reveal delay={200}>
+                            <p className="mx-auto mt-6 max-w-2xl text-lg text-indigo-100 sm:text-xl">
+                                Free timetable software for principals. Add your
+                                teachers and subjects, click{' '}
+                                <strong className="text-white">Generate</strong>
+                                , and print a clash-free, colour-coded timetable
+                                for every class in minutes.
+                            </p>
+                        </Reveal>
+                        <Reveal delay={300}>
+                            <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
+                                <Link
+                                    href={auth.user ? dashboard() : register()}
+                                    className="group inline-flex items-center gap-2 rounded-xl bg-white px-7 py-3.5 font-semibold text-indigo-700 shadow-xl shadow-indigo-900/30 transition hover:-translate-y-0.5 hover:bg-indigo-50"
+                                >
+                                    {auth.user
+                                        ? 'Go to dashboard'
+                                        : 'Create free school account'}
+                                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                                </Link>
+                                <a
+                                    href="/"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        document
+                                            .getElementById('how-it-works')
+                                            ?.scrollIntoView({
+                                                behavior: 'smooth',
+                                            });
+                                    }}
+                                    className="inline-flex items-center gap-1.5 rounded-xl border border-white/40 px-6 py-3.5 font-medium backdrop-blur transition hover:bg-white/15"
+                                >
+                                    See how it works
+                                    <ChevronDown className="size-4" />
+                                </a>
+                            </div>
+                        </Reveal>
+                        <Reveal delay={400}>
+                            <ul className="mt-7 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-indigo-100">
+                                {[
+                                    'Free forever',
+                                    'Set up in under 30 minutes',
+                                    'Works on phone, tablet & computer',
+                                ].map((item) => (
+                                    <li
+                                        key={item}
+                                        className="flex items-center gap-1.5"
                                     >
-                                        See how it works
-                                        <ChevronDown className="size-4" />
-                                    </a>
-                                </div>
+                                        <CheckCircle2 className="size-4 text-green-300" />{' '}
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                        </Reveal>
+                    </div>
+                </section>
+
+                {/* ---------------- Devices: desktop, tablet, phone ---------------- */}
+                <section
+                    onPointerMove={onHeroMove}
+                    onPointerLeave={() => setTilt({ x: 0, y: 0 })}
+                    className="relative z-10 -mt-36 px-4 pb-8 sm:-mt-52 sm:pb-16 lg:-mt-72"
+                >
+                    <div className="relative mx-auto max-w-5xl [perspective:1600px]">
+                        <Reveal from="zoom" delay={200}>
+                            <div
+                                style={{
+                                    transform: `rotateY(${tilt.x * 6}deg) rotateX(${-tilt.y * 6}deg)`,
+                                    transition: 'transform 250ms ease-out',
+                                }}
+                            >
+                                <DesktopDevice />
+                            </div>
+                        </Reveal>
+
+                        <div className="absolute -bottom-4 -left-14 hidden w-80 lg:block xl:-left-32">
+                            <Reveal from="left" delay={600}>
+                                <TabletDevice style={layer(30)} />
                             </Reveal>
-                            <Reveal delay={400}>
-                                <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
-                                    {[
-                                        'Free forever',
-                                        'Set up in under 30 minutes',
-                                        'Works on phone & computer',
-                                    ].map((item) => (
-                                        <li
-                                            key={item}
-                                            className="flex items-center gap-1.5"
-                                        >
-                                            <CheckCircle2 className="size-4 text-green-600" />{' '}
-                                            {item}
-                                        </li>
-                                    ))}
-                                </ul>
+                        </div>
+                        <div className="absolute -right-8 -bottom-10 hidden w-44 lg:block xl:-right-24">
+                            <Reveal from="right" delay={750}>
+                                <PhoneDevice style={layer(45)} />
                             </Reveal>
                         </div>
 
-                        {/* Preview with mouse parallax / 3D tilt */}
-                        <Reveal
-                            from="zoom"
-                            delay={200}
-                            className="[perspective:1200px]"
+                        {/* Floating status chips */}
+                        <div
+                            className="absolute -top-5 right-[12%] z-10 hidden sm:block"
+                            style={layer(55)}
                         >
-                            <div
-                                className="relative"
-                                style={{
-                                    transform: `rotateY(${tilt.x * 10}deg) rotateX(${-tilt.y * 10}deg)`,
-                                    transition: 'transform 200ms ease-out',
-                                    transformStyle: 'preserve-3d',
-                                }}
-                            >
-                                <div className="absolute -inset-4 rounded-3xl bg-gradient-to-tr from-indigo-500/25 to-sky-400/25 blur-2xl" />
-                                <div className="relative rounded-2xl border bg-card p-4 shadow-2xl">
-                                    <div className="mb-3 flex items-center justify-between">
-                                        <div>
-                                            <p className="text-sm font-semibold">
-                                                Class 10A
-                                            </p>
-                                            <p className="text-xs text-muted-foreground">
-                                                Term 1 · Published
-                                            </p>
-                                        </div>
-                                        <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[11px] font-medium text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300">
-                                            Class teacher: Mrs. Silva
-                                        </span>
-                                    </div>
-                                    <div className="grid grid-cols-5 gap-1.5">
-                                        {previewDays.map((day) => (
-                                            <div
-                                                key={day}
-                                                className="pb-1 text-center text-[11px] font-medium text-muted-foreground"
-                                            >
-                                                {day}
-                                            </div>
-                                        ))}
-                                        {previewGrid.map((row, rowIndex) =>
-                                            row === null ? (
-                                                <div
-                                                    key={`break-${rowIndex}`}
-                                                    className="col-span-5 rounded-md bg-amber-100 py-1 text-center text-[11px] font-medium text-amber-800 dark:bg-amber-900/40 dark:text-amber-300"
-                                                >
-                                                    Interval
-                                                </div>
-                                            ) : (
-                                                row.map(
-                                                    (subject, columnIndex) => (
-                                                        <div
-                                                            key={`${rowIndex}-${columnIndex}`}
-                                                            className={`${subjectColors[subject]} flex h-8 animate-cell-in items-center justify-center rounded-md text-[10px] font-medium text-white opacity-0 shadow-sm transition hover:z-10 hover:scale-110`}
-                                                            style={{
-                                                                animationDelay: `${400 + (rowIndex * 5 + columnIndex) * 35}ms`,
-                                                            }}
-                                                        >
-                                                            {subject}
-                                                        </div>
-                                                    ),
-                                                )
-                                            ),
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Floating chips that move more than the card (depth) */}
-                                <div className="absolute -top-5 -right-3 animate-float rounded-xl border bg-card px-3 py-2 text-xs font-semibold shadow-lg sm:-right-6">
+                            <Reveal from="zoom" delay={1000}>
+                                <div className="animate-float rounded-xl border bg-card px-3 py-2 text-xs font-semibold shadow-xl">
                                     <span className="flex items-center gap-1.5 text-green-700 dark:text-green-400">
                                         <CheckCircle2 className="size-4" /> 0
                                         clashes found
                                     </span>
                                 </div>
-                                <div className="absolute -bottom-5 -left-3 animate-float rounded-xl border bg-card px-3 py-2 text-xs font-semibold shadow-lg [animation-delay:1.5s] sm:-left-6">
+                            </Reveal>
+                        </div>
+                        <div
+                            className="absolute -top-5 left-[12%] z-10 hidden sm:block"
+                            style={layer(-45)}
+                        >
+                            <Reveal from="zoom" delay={1150}>
+                                <div className="animate-float rounded-xl border bg-card px-3 py-2 text-xs font-semibold shadow-xl [animation-delay:1.5s]">
                                     <span className="flex items-center gap-1.5">
-                                        <Wand2 className="size-4 text-indigo-600" />{' '}
+                                        <Wand2 className="size-4 text-violet-600" />{' '}
                                         Generated in 3 seconds
                                     </span>
                                 </div>
-                            </div>
+                            </Reveal>
+                        </div>
+                    </div>
+
+                    {/* Tablet + phone sit side by side under the desktop on smaller screens */}
+                    <div className="mx-auto mt-10 grid max-w-xl grid-cols-1 items-end gap-6 sm:grid-cols-[1fr_0.45fr] sm:gap-4 lg:hidden">
+                        <Reveal from="left" className="min-w-0">
+                            <TabletDevice />
+                        </Reveal>
+                        <Reveal
+                            from="right"
+                            delay={150}
+                            className="mx-auto w-48 min-w-0 sm:w-auto"
+                        >
+                            <PhoneDevice />
                         </Reveal>
                     </div>
+
+                    <Reveal className="mx-auto mt-14 max-w-3xl text-center lg:mt-24">
+                        <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+                            One timetable. Every screen.
+                        </h2>
+                        <p className="mt-2 text-muted-foreground">
+                            Plan on the office computer, check on a tablet in
+                            the staffroom, and every teacher sees it on their
+                            phone.
+                        </p>
+                        <div className="mt-6 flex flex-wrap justify-center gap-3">
+                            {[
+                                {
+                                    icon: Monitor,
+                                    label: 'Desktop',
+                                    color: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300',
+                                },
+                                {
+                                    icon: Tablet,
+                                    label: 'Tablet',
+                                    color: 'bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300',
+                                },
+                                {
+                                    icon: Smartphone,
+                                    label: 'Phone',
+                                    color: 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-950 dark:text-fuchsia-300',
+                                },
+                                {
+                                    icon: Download,
+                                    label: 'PDF · PNG · JPG',
+                                    color: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
+                                },
+                            ].map((item) => (
+                                <span
+                                    key={item.label}
+                                    className={`inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium ${item.color}`}
+                                >
+                                    <item.icon className="size-4" />{' '}
+                                    {item.label}
+                                </span>
+                            ))}
+                        </div>
+                    </Reveal>
                 </section>
 
                 {/* ---------------- Stats ---------------- */}
@@ -737,7 +819,7 @@ export default function Welcome() {
                             </p>
                         </Reveal>
                         <ol className="relative grid gap-8 md:grid-cols-3">
-                            <div className="absolute top-0 right-[16%] left-[16%] hidden h-0.5 bg-gradient-to-r from-indigo-200 via-indigo-400 to-indigo-200 md:block dark:from-indigo-900 dark:via-indigo-700 dark:to-indigo-900" />
+                            <div className="absolute top-0 right-[16%] left-[16%] hidden h-0.5 bg-indigo-200 md:block dark:bg-indigo-900" />
                             {steps.map((step, index) => (
                                 <Reveal key={step.title} delay={index * 150}>
                                     <li className="relative h-full rounded-xl border bg-card p-6 pt-8 text-center transition hover:-translate-y-1 hover:shadow-lg">
@@ -764,7 +846,7 @@ export default function Welcome() {
                 {/* ---------------- Why free + FAQ ---------------- */}
                 <section className="mx-auto grid max-w-6xl gap-10 px-4 py-20 lg:grid-cols-2">
                     <Reveal from="left">
-                        <div className="h-full rounded-2xl border border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 p-8 dark:border-green-900 dark:from-green-950/40 dark:to-emerald-950/20">
+                        <div className="h-full rounded-2xl border border-green-200 bg-green-50 p-8 dark:border-green-900 dark:bg-green-950/30">
                             <span className="inline-flex rounded-xl bg-green-600 p-3 text-white">
                                 <HeartHandshake className="size-6" />
                             </span>
@@ -846,9 +928,7 @@ export default function Welcome() {
                 {/* ---------------- Final CTA ---------------- */}
                 <section className="px-4 pb-20">
                     <Reveal from="zoom">
-                        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 to-sky-500 p-10 text-center text-white shadow-xl sm:p-14">
-                            <div className="pointer-events-none absolute -top-16 -left-16 size-56 animate-float rounded-full bg-white/10 blur-2xl" />
-                            <div className="pointer-events-none absolute -right-10 -bottom-20 size-64 animate-float rounded-full bg-white/10 blur-2xl [animation-delay:2s]" />
+                        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-2xl bg-indigo-600 p-10 text-center text-white shadow-xl sm:p-14">
                             <h2 className="relative text-3xl font-bold sm:text-4xl">
                                 Your next timetable is free. Start now.
                             </h2>

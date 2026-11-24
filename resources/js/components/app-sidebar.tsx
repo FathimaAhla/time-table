@@ -31,7 +31,11 @@ import { index as subjectsIndex } from '@/routes/subjects';
 import { index as teachersIndex } from '@/routes/teachers';
 import { index as assignmentsIndex } from '@/routes/assignments';
 import { index as timeSlotsIndex } from '@/routes/time-slots';
-import { index as timetableIndex, mine as myTimetable, teachers as allTeacherTimetables } from '@/routes/timetable';
+import {
+    index as timetableIndex,
+    mine as myTimetable,
+    teachers as allTeacherTimetables,
+} from '@/routes/timetable';
 import { index as institutesIndex } from '@/routes/institutes';
 import { index as usersIndex } from '@/routes/users';
 import type { NavItem } from '@/types';
@@ -88,10 +92,31 @@ export function AppSidebar() {
     const { isSuperAdmin, isTeacher } = usePage().props;
 
     const navItems: NavItem[] = [
-        ...(isTeacher ? [{ title: 'My Timetable', href: myTimetable(), icon: CalendarDays }] : []),
+        ...(isTeacher
+            ? [
+                  {
+                      title: 'My Timetable',
+                      href: myTimetable(),
+                      icon: CalendarDays,
+                  },
+              ]
+            : []),
         ...mainNavItems,
-        { title: 'Teacher Timetables', href: allTeacherTimetables(), icon: Users },
-        ...(isSuperAdmin ? [{ title: 'Institutes', href: institutesIndex(), icon: Building2 }, { title: 'Users & Logins', href: usersIndex(), icon: Users }] : []),
+        {
+            title: 'Teacher Timetables',
+            href: allTeacherTimetables(),
+            icon: Users,
+        },
+        ...(isSuperAdmin
+            ? [
+                  {
+                      title: 'Institutes',
+                      href: institutesIndex(),
+                      icon: Building2,
+                  },
+                  { title: 'Users & Logins', href: usersIndex(), icon: Users },
+              ]
+            : []),
     ];
 
     return (

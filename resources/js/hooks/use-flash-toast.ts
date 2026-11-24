@@ -22,7 +22,9 @@ export function useFlashToast(): void {
         });
 
         const removeSuccessListener = router.on('success', (event) => {
-            const flash = (event as CustomEvent).detail?.page?.props?.flash as SessionFlash | undefined;
+            const flash = (event as CustomEvent).detail?.page?.props?.flash as
+                | SessionFlash
+                | undefined;
 
             if (flash?.success) {
                 toast.success(flash.success);
@@ -34,7 +36,9 @@ export function useFlashToast(): void {
         });
 
         const removeErrorListener = router.on('error', (event) => {
-            const errors = (event as CustomEvent).detail?.errors as Record<string, string> | undefined;
+            const errors = (event as CustomEvent).detail?.errors as
+                | Record<string, string>
+                | undefined;
             const firstError = errors ? Object.values(errors)[0] : null;
 
             if (firstError) {

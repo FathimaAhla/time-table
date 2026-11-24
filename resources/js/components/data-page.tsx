@@ -45,8 +45,14 @@ export function PageHeader({
     return (
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div>
-                <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-                {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
+                <h1 className="text-2xl font-semibold tracking-tight">
+                    {title}
+                </h1>
+                {description && (
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        {description}
+                    </p>
+                )}
             </div>
             <div className="flex items-center gap-2">
                 {actions}
@@ -89,7 +95,13 @@ export function SearchBar({
     );
 }
 
-export function DataTable({ head, children }: { head: ReactNode; children: ReactNode }) {
+export function DataTable({
+    head,
+    children,
+}: {
+    head: ReactNode;
+    children: ReactNode;
+}) {
     return (
         <div className="relative w-full overflow-x-auto rounded-xl border bg-card">
             <table className="w-full caption-bottom text-sm">
@@ -126,9 +138,15 @@ export function EmptyRow({
         <tr className="hover:bg-transparent!">
             <td colSpan={colSpan} className="py-12! text-center">
                 <div className="flex flex-col items-center">
-                    <div className="mb-3 flex size-14 items-center justify-center rounded-full bg-muted text-muted-foreground">{icon}</div>
+                    <div className="mb-3 flex size-14 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                        {icon}
+                    </div>
                     <h3 className="text-base font-medium">{title}</h3>
-                    {hint && <p className="mt-1 text-sm text-muted-foreground">{hint}</p>}
+                    {hint && (
+                        <p className="mt-1 text-sm text-muted-foreground">
+                            {hint}
+                        </p>
+                    )}
                     {canManage && onCreate && (
                         <Button size="sm" className="mt-4" onClick={onCreate}>
                             <Plus className="size-4" />
@@ -159,7 +177,12 @@ export function RowActions({
     return (
         <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="size-8" aria-label="Row actions">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8"
+                    aria-label="Row actions"
+                >
                     <MoreHorizontal className="size-4" />
                 </Button>
             </DropdownMenuTrigger>
@@ -219,11 +242,17 @@ export function FormModal({
                 >
                     <DialogHeader>
                         <DialogTitle>{title}</DialogTitle>
-                        {description && <DialogDescription>{description}</DialogDescription>}
+                        {description && (
+                            <DialogDescription>{description}</DialogDescription>
+                        )}
                     </DialogHeader>
                     <div className="grid gap-4">{children}</div>
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => onOpenChange(false)}
+                        >
                             Cancel
                         </Button>
                         <Button type="submit" disabled={processing}>
@@ -257,7 +286,10 @@ export function ConfirmDeleteModal({
                     <DialogDescription>{message}</DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => onOpenChange(false)}>
+                    <Button
+                        variant="outline"
+                        onClick={() => onOpenChange(false)}
+                    >
                         Cancel
                     </Button>
                     <Button
@@ -285,18 +317,37 @@ export function StatusBadge({ status }: { status: 'active' | 'inactive' }) {
                     : 'bg-muted text-muted-foreground',
             )}
         >
-            <span className={cn('size-1.5 rounded-full', status === 'active' ? 'bg-emerald-500' : 'bg-muted-foreground/60')} />
+            <span
+                className={cn(
+                    'size-1.5 rounded-full',
+                    status === 'active'
+                        ? 'bg-emerald-500'
+                        : 'bg-muted-foreground/60',
+                )}
+            />
             {status}
         </span>
     );
 }
 
-export function FormField({ label, error, children, hint }: { label: string; error?: string; hint?: string; children: ReactNode }) {
+export function FormField({
+    label,
+    error,
+    children,
+    hint,
+}: {
+    label: string;
+    error?: string;
+    hint?: string;
+    children: ReactNode;
+}) {
     return (
         <div className="grid gap-1.5 [&_[data-slot=select-trigger]]:w-full">
             <label className="text-sm font-medium">{label}</label>
             {children}
-            {hint && !error && <p className="text-xs text-muted-foreground">{hint}</p>}
+            {hint && !error && (
+                <p className="text-xs text-muted-foreground">{hint}</p>
+            )}
             {error && <p className="text-xs text-destructive">{error}</p>}
         </div>
     );
@@ -305,8 +356,18 @@ export function FormField({ label, error, children, hint }: { label: string; err
 /**
  * Case-insensitive match of a search term against any of the given values.
  */
-export function matchesSearch(search: string, ...values: Array<string | number | null | undefined>): boolean {
+export function matchesSearch(
+    search: string,
+    ...values: Array<string | number | null | undefined>
+): boolean {
     const term = search.trim().toLowerCase();
 
-    return term === '' || values.some((value) => String(value ?? '').toLowerCase().includes(term));
+    return (
+        term === '' ||
+        values.some((value) =>
+            String(value ?? '')
+                .toLowerCase()
+                .includes(term),
+        )
+    );
 }

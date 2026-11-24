@@ -16,13 +16,21 @@ import {
 } from '@/components/data-page';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import type { BreadcrumbItem } from '@/types';
 import type { Subject, Teacher } from '@/types/timetable';
 import { index as teachersIndex } from '@/routes/teachers';
 import { teacher as teacherTimetable } from '@/routes/timetable';
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Teachers', href: teachersIndex() }];
+const breadcrumbs: BreadcrumbItem[] = [
+    { title: 'Teachers', href: teachersIndex() },
+];
 
 type TeacherForm = {
     employee_no: string;
@@ -48,14 +56,27 @@ const emptyForm: TeacherForm = {
     status: 'active',
 };
 
-export default function TeachersIndex({ teachers, subjects }: { teachers: Teacher[]; subjects: Subject[] }) {
+export default function TeachersIndex({
+    teachers,
+    subjects,
+}: {
+    teachers: Teacher[];
+    subjects: Subject[];
+}) {
     const [search, setSearch] = useState('');
     const [modalOpen, setModalOpen] = useState(false);
     const [editing, setEditing] = useState<Teacher | null>(null);
     const [deleting, setDeleting] = useState<Teacher | null>(null);
     const form = useForm<TeacherForm>(emptyForm);
 
-    const rows = teachers.filter((t) => matchesSearch(search, t.full_name, t.employee_no, ...(t.subjects?.map((s) => s.name) ?? [])));
+    const rows = teachers.filter((t) =>
+        matchesSearch(
+            search,
+            t.full_name,
+            t.employee_no,
+            ...(t.subjects?.map((s) => s.name) ?? []),
+        ),
+    );
 
     function openCreate() {
         setEditing(null);
@@ -83,11 +104,17 @@ export default function TeachersIndex({ teachers, subjects }: { teachers: Teache
 
     function toggleSubject(id: number) {
         const ids = form.data.subject_ids;
-        form.setData('subject_ids', ids.includes(id) ? ids.filter((s) => s !== id) : [...ids, id]);
+        form.setData(
+            'subject_ids',
+            ids.includes(id) ? ids.filter((s) => s !== id) : [...ids, id],
+        );
     }
 
     function submit() {
-        const options = { preserveScroll: true, onSuccess: () => setModalOpen(false) };
+        const options = {
+            preserveScroll: true,
+            onSuccess: () => setModalOpen(false),
+        };
 
         if (editing) {
             form.put(TeacherController.update.url(editing.id), options);
@@ -107,7 +134,11 @@ export default function TeachersIndex({ teachers, subjects }: { teachers: Teache
                 createLabel="New Teacher"
                 onCreate={openCreate}
             />
-            <SearchBar value={search} onChange={setSearch} placeholder="Search by name, employee no. or subject..." />
+            <SearchBar
+                value={search}
+                onChange={setSearch}
+                placeholder="Search by name, employee no. or subject..."
+            />
 
             <DataTable
                 head={
@@ -126,13 +157,18 @@ export default function TeachersIndex({ teachers, subjects }: { teachers: Teache
                         <td className="text-muted-foreground">{index + 1}</td>
                         <td>
                             <div className="font-medium">{t.full_name}</div>
-                            <div className="font-mono text-xs text-muted-foreground">{t.employee_no}</div>
+                            <div className="font-mono text-xs text-muted-foreground">
+                                {t.employee_no}
+                            </div>
                         </td>
                         <td>
                             <div className="flex max-w-sm flex-wrap gap-1">
                                 {t.subjects?.length
                                     ? t.subjects.map((s) => (
-                                          <span key={s.id} className="rounded-md border px-1.5 py-0.5 text-xs">
+                                          <span
+                                              key={s.id}
+                                              className="rounded-md border px-1.5 py-0.5 text-xs"
+                                          >
                                               {s.name}
                                           </span>
                                       ))
@@ -146,7 +182,10 @@ export default function TeachersIndex({ teachers, subjects }: { teachers: Teache
                             <StatusBadge status={t.status} />
                         </td>
                         <td className="text-right">
-                            <RowActions onEdit={() => openEdit(t)} onDelete={() => setDeleting(t)}>
+                            <RowActions
+                                onEdit={() => openEdit(t)}
+                                onDelete={() => setDeleting(t)}
+                            >
                                 <DropdownMenuItem asChild>
                                     <Link href={teacherTimetable(t.id)}>
                                         <CalendarDays className="size-4" />
@@ -178,52 +217,133 @@ export default function TeachersIndex({ teachers, subjects }: { teachers: Teache
                 onSubmit={submit}
                 className="sm:max-w-xl"
             >
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <FormField label="Employee no." error={form.errors.employee_no}>
-                        <Input value={form.data.employee_no} onChange={(e) => form.setData('employee_no', e.target.value)} placeholder="T-1001" required />
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    <FormField
+                        label="Employee no."
+                        error={form.errors.employee_no}
+                    >
+                        <Input
+                            value={form.data.employee_no}
+                            onChange={(e) =>
+                                form.setData('employee_no', e.target.value)
+                            }
+                            placeholder="T-1001"
+                            required
+                        />
                     </FormField>
                     <div className="col-span-2">
-                        <FormField label="Full name" error={form.errors.full_name}>
-                            <Input value={form.data.full_name} onChange={(e) => form.setData('full_name', e.target.value)} placeholder="e.g. Mrs. Amara Perera" required />
+                        <FormField
+                            label="Full name"
+                            error={form.errors.full_name}
+                        >
+                            <Input
+                                value={form.data.full_name}
+                                onChange={(e) =>
+                                    form.setData('full_name', e.target.value)
+                                }
+                                placeholder="e.g. Mrs. Amara Perera"
+                                required
+                            />
                         </FormField>
                     </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <FormField label="Phone" error={form.errors.phone}>
-                        <Input value={form.data.phone} onChange={(e) => form.setData('phone', e.target.value)} />
+                        <Input
+                            value={form.data.phone}
+                            onChange={(e) =>
+                                form.setData('phone', e.target.value)
+                            }
+                        />
                     </FormField>
                     <FormField label="Email" error={form.errors.email}>
-                        <Input type="email" value={form.data.email} onChange={(e) => form.setData('email', e.target.value)} />
+                        <Input
+                            type="email"
+                            value={form.data.email}
+                            onChange={(e) =>
+                                form.setData('email', e.target.value)
+                            }
+                        />
                     </FormField>
                 </div>
-                <FormField label="Qualification" error={form.errors.qualification}>
-                    <Input value={form.data.qualification} onChange={(e) => form.setData('qualification', e.target.value)} placeholder="e.g. B.Ed (Mathematics)" />
+                <FormField
+                    label="Qualification"
+                    error={form.errors.qualification}
+                >
+                    <Input
+                        value={form.data.qualification}
+                        onChange={(e) =>
+                            form.setData('qualification', e.target.value)
+                        }
+                        placeholder="e.g. B.Ed (Mathematics)"
+                    />
                 </FormField>
                 <div className="grid grid-cols-3 gap-4">
-                    <FormField label="Max periods / day" error={form.errors.max_periods_per_day}>
-                        <Input type="number" value={form.data.max_periods_per_day} onChange={(e) => form.setData('max_periods_per_day', e.target.value)} />
+                    <FormField
+                        label="Max periods / day"
+                        error={form.errors.max_periods_per_day}
+                    >
+                        <Input
+                            type="number"
+                            value={form.data.max_periods_per_day}
+                            onChange={(e) =>
+                                form.setData(
+                                    'max_periods_per_day',
+                                    e.target.value,
+                                )
+                            }
+                        />
                     </FormField>
-                    <FormField label="Max periods / week" error={form.errors.max_periods_per_week}>
-                        <Input type="number" value={form.data.max_periods_per_week} onChange={(e) => form.setData('max_periods_per_week', e.target.value)} />
+                    <FormField
+                        label="Max periods / week"
+                        error={form.errors.max_periods_per_week}
+                    >
+                        <Input
+                            type="number"
+                            value={form.data.max_periods_per_week}
+                            onChange={(e) =>
+                                form.setData(
+                                    'max_periods_per_week',
+                                    e.target.value,
+                                )
+                            }
+                        />
                     </FormField>
                     {editing && (
                         <FormField label="Status" error={form.errors.status}>
-                            <Select value={form.data.status} onValueChange={(value) => form.setData('status', value as Teacher['status'])}>
+                            <Select
+                                value={form.data.status}
+                                onValueChange={(value) =>
+                                    form.setData(
+                                        'status',
+                                        value as Teacher['status'],
+                                    )
+                                }
+                            >
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="active">Active</SelectItem>
-                                    <SelectItem value="inactive">Inactive</SelectItem>
+                                    <SelectItem value="active">
+                                        Active
+                                    </SelectItem>
+                                    <SelectItem value="inactive">
+                                        Inactive
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
                         </FormField>
                     )}
                 </div>
-                <FormField label="Qualified subjects" error={form.errors.subject_ids}>
+                <FormField
+                    label="Qualified subjects"
+                    error={form.errors.subject_ids}
+                >
                     <div className="flex flex-wrap gap-2">
                         {subjects.map((s) => {
-                            const selected = form.data.subject_ids.includes(s.id);
+                            const selected = form.data.subject_ids.includes(
+                                s.id,
+                            );
 
                             return (
                                 <button
@@ -232,7 +352,9 @@ export default function TeachersIndex({ teachers, subjects }: { teachers: Teache
                                     onClick={() => toggleSubject(s.id)}
                                     className={
                                         'rounded-full border px-3 py-1 text-xs transition ' +
-                                        (selected ? 'border-primary bg-primary text-primary-foreground' : 'hover:bg-muted')
+                                        (selected
+                                            ? 'border-primary bg-primary text-primary-foreground'
+                                            : 'hover:bg-muted')
                                     }
                                 >
                                     {s.name}
@@ -248,7 +370,12 @@ export default function TeachersIndex({ teachers, subjects }: { teachers: Teache
                 onOpenChange={(open) => !open && setDeleting(null)}
                 title="Delete Teacher"
                 message={`Delete ${deleting?.full_name}? Their periods will be left without a teacher.`}
-                onConfirm={() => deleting && router.delete(TeacherController.destroy.url(deleting.id), { preserveScroll: true })}
+                onConfirm={() =>
+                    deleting &&
+                    router.delete(TeacherController.destroy.url(deleting.id), {
+                        preserveScroll: true,
+                    })
+                }
             />
         </div>
     );

@@ -2,8 +2,11 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Users } from 'lucide-react';
 import { useMemo } from 'react';
 import TimetableController from '@/actions/App/Http/Controllers/TimetableController';
+import { ColorfulToggle } from '@/components/colorful-toggle';
 import { ExportMenu } from '@/components/export-menu';
 import { Button } from '@/components/ui/button';
+import { useColorful } from '@/hooks/use-colorful';
+import { subjectColor, tint } from '@/lib/subject-color';
 import {
     Select,
     SelectContent,
@@ -60,6 +63,7 @@ export default function MasterTimetable({
     filters: Record<string, string | undefined>;
 }) {
     const { currentInstitute, canManage } = usePage().props;
+    const [colorful] = useColorful();
 
     function setFilter(key: string, value: string) {
         router.get(
@@ -140,6 +144,7 @@ export default function MasterTimetable({
                             Generate all classes
                         </Button>
                     )}
+                    <ColorfulToggle />
                     <ExportMenu
                         elementId="master-timetable-grid"
                         filename="master-timetable"
@@ -314,10 +319,29 @@ export default function MasterTimetable({
                                                         return (
                                                             <td
                                                                 key={day.id}
-                                                                className="border p-1.5"
+                                                                className="border p-1"
                                                             >
                                                                 {session ? (
-                                                                    <div>
+                                                                    <div
+                                                                        className={`p-1 ${colorful ? 'rounded-md border-l-4' : ''}`}
+                                                                        style={
+                                                                            colorful
+                                                                                ? {
+                                                                                      backgroundColor:
+                                                                                          tint(
+                                                                                              subjectColor(
+                                                                                                  session.subject,
+                                                                                              ),
+                                                                                              0.14,
+                                                                                          ),
+                                                                                      borderLeftColor:
+                                                                                          subjectColor(
+                                                                                              session.subject,
+                                                                                          ),
+                                                                                  }
+                                                                                : undefined
+                                                                        }
+                                                                    >
                                                                         <div className="font-medium">
                                                                             {
                                                                                 session

@@ -78,24 +78,24 @@ function formatDate(value: string): string {
 
 const statColors = {
     indigo: {
-        icon: 'from-indigo-500 to-violet-500 shadow-indigo-500/30',
+        icon: 'bg-indigo-500 shadow-indigo-500/30',
         glow: 'bg-indigo-500/10',
-        bar: 'from-indigo-500 to-violet-500',
+        bar: 'bg-indigo-500',
     },
     emerald: {
-        icon: 'from-emerald-500 to-teal-500 shadow-emerald-500/30',
+        icon: 'bg-emerald-500 shadow-emerald-500/30',
         glow: 'bg-emerald-500/10',
-        bar: 'from-emerald-500 to-teal-500',
+        bar: 'bg-emerald-500',
     },
     sky: {
-        icon: 'from-sky-500 to-cyan-500 shadow-sky-500/30',
+        icon: 'bg-sky-500 shadow-sky-500/30',
         glow: 'bg-sky-500/10',
-        bar: 'from-sky-500 to-cyan-500',
+        bar: 'bg-sky-500',
     },
     amber: {
-        icon: 'from-amber-500 to-orange-500 shadow-amber-500/30',
+        icon: 'bg-amber-500 shadow-amber-500/30',
         glow: 'bg-amber-500/10',
-        bar: 'from-amber-500 to-orange-500',
+        bar: 'bg-amber-500',
     },
 } as const;
 
@@ -119,13 +119,13 @@ function StatCard({
     return (
         <Link
             href={href}
-            className="group relative flex items-start justify-between overflow-hidden rounded-2xl border border-sidebar-border/70 bg-card p-5 transition duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-sidebar-border"
+            className="group relative flex items-start justify-between overflow-hidden rounded-2xl border border-sidebar-border/70 bg-card p-5 transition-all duration-300 ease-out hover:-translate-y-1.5 hover:scale-[1.02] hover:border-transparent hover:shadow-xl dark:border-sidebar-border"
         >
             <span
                 className={`pointer-events-none absolute -top-10 -right-10 size-32 rounded-full ${palette.glow} transition-transform duration-500 group-hover:scale-150`}
             />
             <span
-                className={`absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r ${palette.bar}`}
+                className={`absolute inset-x-0 bottom-0 h-1 ${palette.bar} scale-x-0 transition-transform duration-300 group-hover:scale-x-100`}
             />
             <div className="relative">
                 <p className="text-sm font-medium text-muted-foreground">
@@ -135,7 +135,7 @@ function StatCard({
                 <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
             </div>
             <span
-                className={`relative rounded-xl bg-gradient-to-br p-2.5 text-white shadow-lg transition duration-300 group-hover:scale-110 group-hover:rotate-6 ${palette.icon}`}
+                className={`relative rounded-xl p-2.5 text-white shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 ${palette.icon}`}
             >
                 <Icon className="size-5" />
             </span>
@@ -337,7 +337,7 @@ export default function Dashboard({
                 </div>
 
                 <div className="grid gap-4 lg:grid-cols-3">
-                    <section className="rounded-2xl border border-t-4 border-sidebar-border/70 border-t-indigo-500 bg-card p-5 shadow-sm dark:border-sidebar-border">
+                    <section className="rounded-2xl border border-t-4 border-sidebar-border/70 border-t-indigo-500 bg-card p-5 shadow-sm transition-shadow duration-300 hover:shadow-md dark:border-sidebar-border">
                         <div className="mb-3 flex items-center justify-between">
                             <h2 className="font-semibold">Setup progress</h2>
                             <span className="text-sm font-medium text-primary">
@@ -346,7 +346,7 @@ export default function Dashboard({
                         </div>
                         <div className="mb-4 h-2 overflow-hidden rounded-full bg-muted">
                             <div
-                                className="h-full rounded-full bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 transition-all duration-1000"
+                                className="h-full rounded-full bg-indigo-500 transition-all duration-1000"
                                 style={{ width: `${setupPercent}%` }}
                             />
                         </div>
@@ -377,13 +377,13 @@ export default function Dashboard({
                         </ul>
                     </section>
 
-                    <section className="rounded-2xl border border-t-4 border-sidebar-border/70 border-t-emerald-500 bg-card p-5 shadow-sm dark:border-sidebar-border">
+                    <section className="rounded-2xl border border-t-4 border-sidebar-border/70 border-t-emerald-500 bg-card p-5 shadow-sm transition-shadow duration-300 hover:shadow-md dark:border-sidebar-border">
                         <div className="mb-3 flex items-center justify-between">
                             <h2 className="font-semibold">Timetable health</h2>
                             <CalendarCheck2 className="size-5 text-muted-foreground" />
                         </div>
                         <div className="mb-4 flex items-end gap-2">
-                            <span className="bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-4xl font-bold text-transparent tabular-nums">
+                            <span className="text-4xl font-bold text-emerald-600 tabular-nums dark:text-emerald-400">
                                 {coveragePercent}%
                             </span>
                             <span className="pb-1 text-sm text-muted-foreground">
@@ -448,7 +448,7 @@ export default function Dashboard({
                         )}
                     </section>
 
-                    <section className="rounded-2xl border border-t-4 border-sidebar-border/70 border-t-amber-500 bg-card p-5 shadow-sm dark:border-sidebar-border">
+                    <section className="rounded-2xl border border-t-4 border-sidebar-border/70 border-t-amber-500 bg-card p-5 shadow-sm transition-shadow duration-300 hover:shadow-md dark:border-sidebar-border">
                         <div className="mb-3 flex items-center justify-between">
                             <h2 className="font-semibold">School week</h2>
                             <CalendarClock className="size-5 text-muted-foreground" />
@@ -506,7 +506,7 @@ export default function Dashboard({
                     </section>
                 </div>
 
-                <section className="rounded-2xl border border-t-4 border-sidebar-border/70 border-t-violet-500 bg-card p-5 shadow-sm dark:border-sidebar-border">
+                <section className="rounded-2xl border border-t-4 border-sidebar-border/70 border-t-violet-500 bg-card p-5 shadow-sm transition-shadow duration-300 hover:shadow-md dark:border-sidebar-border">
                     <div className="mb-4 flex items-center justify-between">
                         <h2 className="font-semibold">
                             Teacher workload this term
@@ -549,7 +549,7 @@ export default function Dashboard({
                                         </span>
                                         <div className="h-3 overflow-hidden rounded-full bg-muted">
                                             <div
-                                                className={`h-full rounded-full ${isOverloaded ? 'bg-gradient-to-r from-red-500 to-rose-500' : percent > 80 ? 'bg-gradient-to-r from-amber-400 to-orange-500' : 'bg-gradient-to-r from-indigo-500 to-violet-500'}`}
+                                                className={`h-full rounded-full ${isOverloaded ? 'bg-red-500' : percent > 80 ? 'bg-amber-500' : 'bg-indigo-500'}`}
                                                 style={{ width: `${percent}%` }}
                                             />
                                         </div>

@@ -18,9 +18,13 @@ export default function AuthSimpleLayout({
         <div className="grid min-h-svh bg-background lg:grid-cols-2">
             {/* Hook panel */}
             <div className="relative hidden overflow-hidden bg-indigo-700 p-12 text-white lg:flex lg:flex-col lg:justify-between">
+                <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.07)_1px,transparent_1px)] bg-[size:36px_36px] [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" />
+                <div className="pointer-events-none absolute -top-16 -right-16 size-72 animate-float rounded-full bg-sky-400/20 blur-3xl" />
+                <div className="pointer-events-none absolute bottom-0 left-0 size-72 animate-float rounded-full bg-fuchsia-400/15 blur-3xl [animation-delay:2.5s]" />
+
                 <Link
                     href={home()}
-                    className="relative flex items-center gap-2 font-semibold"
+                    className="relative z-10 flex items-center gap-2 font-semibold"
                 >
                     <span className="rounded-lg bg-white p-2 text-indigo-700">
                         <CalendarDays className="size-5" />
@@ -28,17 +32,20 @@ export default function AuthSimpleLayout({
                     School Timetable
                 </Link>
 
-                <div className="relative">
+                <div className="relative z-10">
                     <h2 className="text-4xl leading-tight font-bold">
                         Stop spending your holidays on the timetable.
                     </h2>
                     <ul className="mt-8 space-y-3">
-                        {points.map((point) => (
+                        {points.map((point, index) => (
                             <li
                                 key={point}
-                                className="flex items-center gap-3 text-indigo-100"
+                                style={{
+                                    animationDelay: `${150 + index * 120}ms`,
+                                }}
+                                className="flex items-center gap-3 text-indigo-100 opacity-0 animate-cell-in"
                             >
-                                <span className="rounded-full bg-white/20 p-1">
+                                <span className="rounded-full bg-white/20 p-1 transition-transform duration-300 hover:scale-110">
                                     <Check className="size-3.5" />
                                 </span>
                                 {point}
@@ -47,7 +54,7 @@ export default function AuthSimpleLayout({
                     </ul>
                 </div>
 
-                <p className="relative text-sm text-indigo-200">
+                <p className="relative z-10 text-sm text-indigo-200">
                     Powered by HalaSoft
                 </p>
             </div>
